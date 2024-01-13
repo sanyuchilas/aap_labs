@@ -155,8 +155,11 @@ void solution(char s[maxSLength]) {
       return;
     }
 
-    if (symbol[0] == ',' && !isMatrixContainRow(wordsArr, uniqueWordsCount, word)) {
-      changeMatrixRow(wordsArr, uniqueWordsCount++, word);
+    if (symbol[0] == ',') {
+      if (!isMatrixContainRow(wordsArr, uniqueWordsCount, word)) {
+        changeMatrixRow(wordsArr, uniqueWordsCount++, word);
+      }
+
       word[0] = '\0';
     } 
 
