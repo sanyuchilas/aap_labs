@@ -2,32 +2,24 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <io.h>
 
 #define FILE_NAME "footbaler.bin"
 #define INPUT_TYPE 'a'
-#define maxNumberOfFilesElements 66
 
-int getMatrixFromBinaryFile(char *fileName, char *matrix[maxNumberOfFilesElements]) {
-  FILE *f = fopen(fileName, "rb");
-
-  if (!f) {
-    printf("File with name %s could not be open for reading.\n", fileName);
-    return -1;
-  }
-
-  int i = 0;
-
-  while (!feof(f)) {
-    fread(matrix[i], sByteSize, 1, f);
-    i++;
-  }
-
-  fclose(f);
-
-  return i;
+void printEntry(struct footballerType entry) {
+  printf("%s, %s, %s, %d, %d, %d\n", entry.fullName, entry.clubName, entry.role, entry.age, entry.numberOfGames, entry.numberOfGoals);
 }
 
-void createBinaryFile(char *fileName, struct footballerType footballer) {
+int getFileLength(FILE *f) {
+  fseek(f, 0, SEEK_END);
+  int fileLength = ftell(f) / sizeof(struct footballerType);
+  fseek(f, 0, SEEK_SET);
+
+  return fileLength;
+}
+
+void createBinaryFile(char *fileName, struct footballerType entry) {
   FILE *f = fopen(fileName, "wb");
 
   if (!f) {
@@ -35,17 +27,11 @@ void createBinaryFile(char *fileName, struct footballerType footballer) {
     return;
   }
 
-  fwrite(&footballer.fullName, sByteSize, 1, f);
-  fwrite(&footballer.clubName, sByteSize, 1, f);
-  fwrite(&footballer.role, sByteSize, 1, f);
-  fwrite(&footballer.age, sByteSize, 1, f);
-  fwrite(&footballer.numberOfGames, sByteSize, 1, f);
-  fwrite(&footballer.numberOfGoals, sByteSize, 1, f);
-
+  fwrite(&entry, sizeof(struct footballerType), 1, f);
   fclose(f);
 }
 
-void appendToBinaryFile(char *fileName, char entry[sLength]) {
+void appendEntry(char *fileName, struct footballerType entry) {
   FILE *f = fopen(fileName, "ab");
 
   if (!f) {
@@ -53,51 +39,44 @@ void appendToBinaryFile(char *fileName, char entry[sLength]) {
     return;
   }
 
-  fwrite(entry, sByteSize, 1, f);
+  fwrite(&entry, sizeof(struct footballerType), 1, f);
   fclose(f);
 }
 
-void deleteRowFromMatrix(char *matrix[maxNumberOfFilesElements], int rowsCount, int rowI) {
-  for (int i = rowI; i < rowsCount - 1; i++) {
-    matrix[i] = matrix[i + 1];
-  }
-}
-
-void updateRowInMatrix(char *matrix[maxNumberOfFilesElements], int rowI, char newEntry[sLength]) {
-  matrix[rowI] = newEntry;
-}
-
-void deleteFromBinaryFile(char *fileName, int entryNumber) {
-  char *footballers[maxNumberOfFilesElements];
-  for (int i = 0; i < 66; i++) {
-    footballers[i] = (char*)malloc(sLength * sizeof(char));
-  }
-
-  int numberOfFilesElements = getMatrixFromBinaryFile(FILE_NAME, footballers);
-  
-  deleteRowFromMatrix(footballers, numberOfFilesElements, entryNumber);
-
-  FILE *f = fopen(fileName, "wb");
+void deleteEntryById(char *fileName, int entryId) {
+  FILE *f = fopen(fileName, "r+b");
 
   if (!f) {
     printf("File with name %s could not be open for changes.\n", fileName);
     return;
   }
 
-  for (int j = 0; j < numberOfFilesElements - 1; j++) {
-    fwrite(footballers[j], sByteSize, 1, f);
+  int fileLength = getFileLength(f);
+
+  struct footballerType tmpEntry;
+  struct footballerType deletedEntry;
+
+  if (entryId >= fileLength) {
+    printf("Couldn't delete entry.\n");
+    return;
+  }
+  
+  fseek(f, entryId * sizeof(struct footballerType), SEEK_SET);
+  fread(&deletedEntry, sizeof(struct footballerType), 1, f);
+
+  for (int i = entryId + 1; i < fileLength; i++) {
+    fread(&tmpEntry, sizeof(struct footballerType), 1, f);
+    fseek(f, (i - 1) * sizeof(struct footballerType), SEEK_SET);
+    fwrite(&tmpEntry, sizeof(struct footballerType), 1, f);
+    fseek(f, (i + 1) * sizeof(struct footballerType), SEEK_SET);
   }
 
+  _chsize(_fileno(f), (fileLength - 1) * sizeof(struct footballerType));
   fclose(f);
-
-  for (int i = 0; i < maxNumberOfFilesElements; i++) {
-    free(footballers[i]);
-  }
-
-  printf("Successfully deleted element from binary file.");
+  printf("Successfully deleted '%s' from binary file.\n", deletedEntry.fullName);
 }
 
-void findInBinaryFile(char *fileName, int entryNumber) {
+void findAllEntriesByFullName(char *fileName, char fieldValue[fieldLength]) {
   FILE *f = fopen(fileName, "rb");
 
   if (!f) {
@@ -105,42 +84,197 @@ void findInBinaryFile(char *fileName, int entryNumber) {
     return;
   }
 
-  char entry[sLength];
+  printf("\nFound all entries by full name '%s':\n", fieldValue);
 
-  fseek(f, entryNumber * sByteSize, SEEK_SET);
-  fread(&entry, sByteSize, 1, f);
+  struct footballerType entry;
+  int fileLength = getFileLength(f);
+  int entriesCount = 0;
 
-  printf("\nFind element: %s\n", entry);
-}
-
-void updateInBinaryFile(char *fileName, int entryNumber, char newEntry[sLength]) {
-  char *footballers[maxNumberOfFilesElements];
-  for (int i = 0; i < 66; i++) {
-    footballers[i] = (char*)malloc(sLength * sizeof(char));
+  for (int i = 0; i < fileLength; i++) {
+    fread(&entry, sizeof(struct footballerType), 1, f);
+    
+    if (!strcmp(entry.fullName, fieldValue)) {
+      printEntry(entry);
+      entriesCount++;
+    }
   }
 
-  int numberOfFilesElements = getMatrixFromBinaryFile(FILE_NAME, footballers);
-  
-  updateRowInMatrix(footballers, entryNumber, newEntry);
+  if (entriesCount == 0) {
+    printf("No entries were found.\n");
+  }
 
-  FILE *f = fopen(fileName, "wb");
+  printf("\n");
+  fclose(f);
+}
+
+void findAllEntriesByClubName(char *fileName, char fieldValue[fieldLength]) {
+  FILE *f = fopen(fileName, "rb");
+
+  if (!f) {
+    printf("File with name %s could not be open for reading.\n", fileName);
+    return;
+  }
+
+  printf("\nFound all entries by club name '%s':\n", fieldValue);
+
+  struct footballerType entry;
+  int fileLength = getFileLength(f);
+  int entriesCount = 0;
+
+  for (int i = 0; i < fileLength; i++) {
+    fread(&entry, sizeof(struct footballerType), 1, f);
+    
+    if (!strcmp(entry.clubName, fieldValue)) {
+      printEntry(entry);
+      entriesCount++;
+    }
+  }
+
+  if (entriesCount == 0) {
+    printf("No entries were found.\n");
+  }
+
+  printf("\n");
+  fclose(f);
+}
+
+void findAllEntriesByRole(char *fileName, char fieldValue[fieldLength]) {
+  FILE *f = fopen(fileName, "rb");
+
+  if (!f) {
+    printf("File with name %s could not be open for reading.\n", fileName);
+    return;
+  }
+
+  printf("\nFound all entries by role '%s':\n", fieldValue);
+
+  struct footballerType entry;
+  int fileLength = getFileLength(f);
+  int entriesCount = 0;
+
+  for (int i = 0; i < fileLength; i++) {
+    fread(&entry, sizeof(struct footballerType), 1, f);
+    
+    if (!strcmp(entry.role, fieldValue)) {
+      printEntry(entry);
+      entriesCount++;
+    }
+  }
+
+  if (entriesCount == 0) {
+    printf("No entries were found.\n");
+  }
+
+  printf("\n");
+  fclose(f);
+}
+
+void findAllEntriesByAge(char *fileName, int fieldValue) {
+  FILE *f = fopen(fileName, "rb");
+
+  if (!f) {
+    printf("File with name %s could not be open for reading.\n", fileName);
+    return;
+  }
+
+  printf("\nFound all entries by age '%d':\n", fieldValue);
+
+  struct footballerType entry;
+  int fileLength = getFileLength(f);
+  int entriesCount = 0;
+
+  for (int i = 0; i < fileLength; i++) {
+    fread(&entry, sizeof(struct footballerType), 1, f);
+    
+    if (entry.age == fieldValue) {
+      printEntry(entry);
+      entriesCount++;
+    }
+  }
+
+  if (entriesCount == 0) {
+    printf("No entries were found.\n");
+  }
+
+  printf("\n");
+  fclose(f);
+}
+
+void findAllEntriesByNumberOfGames(char *fileName, int fieldValue) {
+  FILE *f = fopen(fileName, "rb");
+
+  if (!f) {
+    printf("File with name %s could not be open for reading.\n", fileName);
+    return;
+  }
+
+  printf("\nFound all entries by number of games '%d':\n", fieldValue);
+
+  struct footballerType entry;
+  int fileLength = getFileLength(f);
+  int entriesCount = 0;
+
+  for (int i = 0; i < fileLength; i++) {
+    fread(&entry, sizeof(struct footballerType), 1, f);
+    
+    if (entry.numberOfGames == fieldValue) {
+      printEntry(entry);
+      entriesCount++;
+    }
+  }
+
+  if (entriesCount == 0) {
+    printf("No entries were found.\n");
+  }
+
+  printf("\n");
+  fclose(f);
+}
+
+void findAllEntriesByNumberOfGoals(char *fileName, int fieldValue) {
+  FILE *f = fopen(fileName, "rb");
+
+  if (!f) {
+    printf("File with name %s could not be open for reading.\n", fileName);
+    return;
+  }
+
+  printf("\nFound all entries by number of goals '%d':\n", fieldValue);
+
+  struct footballerType entry;
+  int fileLength = getFileLength(f);
+  int entriesCount = 0;
+
+  for (int i = 0; i < fileLength; i++) {
+    fread(&entry, sizeof(struct footballerType), 1, f);
+    
+    if (entry.numberOfGoals == fieldValue) {
+      printEntry(entry);
+      entriesCount++;
+    }
+  }
+
+  if (entriesCount == 0) {
+    printf("No entries were found.\n");
+  }
+
+  fclose(f);
+  printf("\n");
+}
+
+void updateEntryById(char *fileName, int entryId, struct footballerType newEntry) {
+  FILE *f = fopen(fileName, "r+b");
 
   if (!f) {
     printf("File with name %s could not be open for changes.\n", fileName);
     return;
   }
 
-  for (int j = 0; j < numberOfFilesElements; j++) {
-    fwrite(footballers[j], sByteSize, 1, f);
-  }
+  fseek(f, entryId * sizeof(struct footballerType), SEEK_SET);
+  fwrite(&newEntry, sizeof(struct footballerType), 1, f);
 
   fclose(f);
-
-  for (int i = 0; i < maxNumberOfFilesElements; i++) {
-    free(footballers[i]);
-  }
-
-  printf("Successfully updated element in binary file.");
+  printf("\nSuccessfully updated entry '%d':\n", entryId);
 }
 
 void printBinaryFile(char *fileName) {
@@ -151,19 +285,23 @@ void printBinaryFile(char *fileName) {
     return;
   }
 
-  char row[sLength];
-  unsigned num;
-
   printf("\nPrint binary file:\n");
 
-  fread(row, sByteSize, 1, f);
+  struct footballerType entry;
+
+  fread(&entry, sizeof(struct footballerType), 1, f);
+  
   while (!feof(f)) {
-    printf("%s\n", row);
-    fread(row, sByteSize, 1, f);
+    printEntry(entry);
+    fread(&entry, sizeof(struct footballerType), 1, f);
   }
 
   fclose(f);
-} 
+}
+
+void startMenu() {
+  printf("Enter operation code: ");
+}
 
 int main() {
   #if INPUT_TYPE == 'u'
@@ -172,15 +310,15 @@ int main() {
   struct footballerType footballer;
 
   printf("Enter full name: ");
-  fgets(footballer.fullName, sLength, stdin);
+  fgets(footballer.fullName, fieldLength, stdin);
   footballer.fullName[strcspn(footballer.fullName, "\n")] = 0;
 
   printf("Enter club name: ");
-  fgets(footballer.clubName, sLength, stdin);
+  fgets(footballer.clubName, fieldLength, stdin);
   footballer.clubName[strcspn(footballer.clubName, "\n")] = 0;
 
   printf("Enter role: ");
-  fgets(footballer.role, sLength, stdin);
+  fgets(footballer.role, fieldLength, stdin);
   footballer.role[strcspn(footballer.role, "\n")] = 0;
 
   printf("Enter age: ");
@@ -199,30 +337,53 @@ int main() {
     .fullName="Keyer Alexander Petrovich",
     .clubName="BAM231",
     .role="Goalkeeper",
-    .age="1",
-    .numberOfGames="2",
-    .numberOfGoals="3",
+    .age=1,
+    .numberOfGames=2,
+    .numberOfGoals=3,
   };
   #endif
 
   createBinaryFile(FILE_NAME, footballer);
 
-  appendToBinaryFile(FILE_NAME, "Kachmazov Alexander");
-  appendToBinaryFile(FILE_NAME, "Innopolis");
-  appendToBinaryFile(FILE_NAME, "Guardian");
-  appendToBinaryFile(FILE_NAME, "4");
-  appendToBinaryFile(FILE_NAME, "5");
-  appendToBinaryFile(FILE_NAME, "6");
+   struct footballerType alex = {
+    .fullName="Kachmazov Alex Volphram",
+    .clubName="Innopolis",
+    .role="Guardian",
+    .age=4,
+    .numberOfGames=5,
+    .numberOfGoals=6,
+  };
+
+   struct footballerType igor = {
+    .fullName="Kuzmenkov Igor Druid",
+    .clubName="Innopolis",
+    .role="Goalkeeper",
+    .age=1,
+    .numberOfGames=5,
+    .numberOfGoals=3,
+  };
+
+  appendEntry(FILE_NAME, alex);
+  appendEntry(FILE_NAME, igor);
+
+  findAllEntriesByFullName(FILE_NAME, "Keyer Alexander Petrovich");
+  findAllEntriesByClubName(FILE_NAME, "sfdsfh");
+  findAllEntriesByRole(FILE_NAME, "Goalkeeper");
+  findAllEntriesByAge(FILE_NAME, 1);
+  findAllEntriesByNumberOfGames(FILE_NAME, 5);
+  findAllEntriesByNumberOfGoals(FILE_NAME, 3);
 
   printBinaryFile(FILE_NAME);
+  printf("\n");
+  deleteEntryById(FILE_NAME, 1);
+  printf("\n");
+  printBinaryFile(FILE_NAME);
 
-  findInBinaryFile(FILE_NAME, 2);
-  deleteFromBinaryFile(FILE_NAME, 2);
-  findInBinaryFile(FILE_NAME, 2);
+  printBinaryFile(FILE_NAME);
+  updateEntryById(FILE_NAME, 0, alex);
+  printBinaryFile(FILE_NAME);
 
-  findInBinaryFile(FILE_NAME, 1);
-  updateInBinaryFile(FILE_NAME, 1, "Innopolis");
-  findInBinaryFile(FILE_NAME, 1);
+  startMenu();
 
   return 0;
 }

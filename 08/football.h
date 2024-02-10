@@ -1,11 +1,12 @@
-#define sLength 64
-#define sByteSize sizeof(char) * sLength
+#define fieldLength 64
+#define fieldSize fieldLength * sizeof(char)
+#define entryLength 6
 
 struct footballerType {
-  char fullName[sLength];
-  char clubName[sLength];
-  char role[sLength];
-  char age[sLength];
-  char numberOfGames[sLength];
-  char numberOfGoals[sLength];
+  char fullName[fieldLength];
+  char clubName[fieldLength];
+  char role[fieldLength];
+  int age;
+  int numberOfGames;
+  int numberOfGoals;
 };
