@@ -6,10 +6,31 @@
 #include <io.h>
 
 #define FILE_NAME "footbaler.bin"
-#define INPUT_TYPE 'u'
+#define INPUT_TYPE 'a'
 
-void printEntry(struct footballerType entry) {
-  printf("%s, %s, %s, %d, %d, %d\n", entry.fullName, entry.clubName, entry.role, entry.age, entry.numberOfGames, entry.numberOfGoals);
+void printHr(int length) {
+  for (int j = 0; j < length; j++) {
+      printf("- ");
+    }
+    printf("\n");
+}
+
+void printTableHeader() {
+  printHr(65);
+  printf("%2s|%30s|%30s|%30s|%10s|%10s|%10s|\n", "ID", "FULL NAME", "CLUB NAME", "ROLE", "AGE", "GAMES", "GOALS");
+  printHr(65);
+}
+
+void printEntry(struct footballerType entry, int id) {
+  printf("%2d|%30s|%30s|%30s|%10d|%10d|%10d|\n", id, entry.fullName, entry.clubName, entry.role, entry.age, entry.numberOfGames, entry.numberOfGoals);
+  printHr(65);
+}
+
+void getEntryIdByUser(int *entryId) {
+  printf("Enter footballer id: ");
+
+  fflush(stdin);
+  scanf("%d", entryId);
 }
 
 void getFootballerFullNameByUser(char fullName[fieldLength]) {
@@ -140,6 +161,7 @@ void findAllEntriesByFullName(char *fileName, char fieldValue[fieldLength]) {
   }
 
   printf("\nFound all entries by full name '%s':\n", fieldValue);
+  printTableHeader();
 
   struct footballerType entry;
   int fileLength = getFileLength(f);
@@ -149,7 +171,7 @@ void findAllEntriesByFullName(char *fileName, char fieldValue[fieldLength]) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (!strcmp(entry.fullName, fieldValue)) {
-      printEntry(entry);
+      printEntry(entry, i);
       entriesCount++;
     }
   }
@@ -171,6 +193,7 @@ void findAllEntriesByClubName(char *fileName, char fieldValue[fieldLength]) {
   }
 
   printf("\nFound all entries by club name '%s':\n", fieldValue);
+  printTableHeader();
 
   struct footballerType entry;
   int fileLength = getFileLength(f);
@@ -180,7 +203,7 @@ void findAllEntriesByClubName(char *fileName, char fieldValue[fieldLength]) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (!strcmp(entry.clubName, fieldValue)) {
-      printEntry(entry);
+      printEntry(entry, i);
       entriesCount++;
     }
   }
@@ -202,6 +225,7 @@ void findAllEntriesByRole(char *fileName, char fieldValue[fieldLength]) {
   }
 
   printf("\nFound all entries by role '%s':\n", fieldValue);
+  printTableHeader();
 
   struct footballerType entry;
   int fileLength = getFileLength(f);
@@ -211,7 +235,7 @@ void findAllEntriesByRole(char *fileName, char fieldValue[fieldLength]) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (!strcmp(entry.role, fieldValue)) {
-      printEntry(entry);
+      printEntry(entry, i);
       entriesCount++;
     }
   }
@@ -233,6 +257,7 @@ void findAllEntriesByAge(char *fileName, int fieldValue) {
   }
 
   printf("\nFound all entries by age '%d':\n", fieldValue);
+  printTableHeader();
 
   struct footballerType entry;
   int fileLength = getFileLength(f);
@@ -242,7 +267,7 @@ void findAllEntriesByAge(char *fileName, int fieldValue) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (entry.age == fieldValue) {
-      printEntry(entry);
+      printEntry(entry, i);
       entriesCount++;
     }
   }
@@ -264,6 +289,7 @@ void findAllEntriesByNumberOfGames(char *fileName, int fieldValue) {
   }
 
   printf("\nFound all entries by number of games '%d':\n", fieldValue);
+  printTableHeader();
 
   struct footballerType entry;
   int fileLength = getFileLength(f);
@@ -273,7 +299,7 @@ void findAllEntriesByNumberOfGames(char *fileName, int fieldValue) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (entry.numberOfGames == fieldValue) {
-      printEntry(entry);
+      printEntry(entry, i);
       entriesCount++;
     }
   }
@@ -295,6 +321,7 @@ void findAllEntriesByNumberOfGoals(char *fileName, int fieldValue) {
   }
 
   printf("\nFound all entries by number of goals '%d':\n", fieldValue);
+  printTableHeader();
 
   struct footballerType entry;
   int fileLength = getFileLength(f);
@@ -304,7 +331,7 @@ void findAllEntriesByNumberOfGoals(char *fileName, int fieldValue) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (entry.numberOfGoals == fieldValue) {
-      printEntry(entry);
+      printEntry(entry, i);
       entriesCount++;
     }
   }
@@ -325,11 +352,16 @@ void updateEntryById(char *fileName, int entryId, struct footballerType newEntry
     return;
   }
 
+  if (entryId < 0 || entryId >= getFileLength(f)) {
+    printf("Footballer with id '%d' doesn't exist.", entryId);
+    return;
+  }
+
   fseek(f, entryId * sizeof(struct footballerType), SEEK_SET);
   fwrite(&newEntry, sizeof(struct footballerType), 1, f);
 
   fclose(f);
-  printf("\nSuccessfully updated entry '%d':\n", entryId);
+  printf("\nSuccessfully updated entry '%d'.\n", entryId);
 }
 
 void printBinaryFile(char *fileName) {
@@ -340,14 +372,17 @@ void printBinaryFile(char *fileName) {
     return;
   }
 
-  printf("\nPrint binary file:\n");
+  printTableHeader();
 
   struct footballerType entry;
 
   fread(&entry, sizeof(struct footballerType), 1, f);
+
+  int i = 0;
   
   while (!feof(f)) {
-    printEntry(entry);
+    printEntry(entry, i++);
+
     fread(&entry, sizeof(struct footballerType), 1, f);
   }
 
@@ -404,22 +439,22 @@ void startFindAllEntriesMenu() {
 
     case 4: {
       int age;
-      getFootballerAgeByUser(age);
-      findAllEntriesByAge(FILE_NAME, &age);
+      getFootballerAgeByUser(&age);
+      findAllEntriesByAge(FILE_NAME, age);
       break;
     }
 
     case 5: {
       int numberOfGoals;
-      getFootballerNumberOfGoalsByUser(numberOfGoals);
-      findAllEntriesByNumberOfGoals(FILE_NAME, &numberOfGoals);
+      getFootballerNumberOfGoalsByUser(&numberOfGoals);
+      findAllEntriesByNumberOfGoals(FILE_NAME, numberOfGoals);
       break;
     }
 
     case 6: {
       int numberOfGames;
-      getFootballerNumberOfGamesByUser(numberOfGames);
-      findAllEntriesByNumberOfGames(FILE_NAME, &numberOfGames);
+      getFootballerNumberOfGamesByUser(&numberOfGames);
+      findAllEntriesByNumberOfGames(FILE_NAME, numberOfGames);
       break;
     }
   }
@@ -432,6 +467,7 @@ void printMainOperationsList() {
   printf("%30s %3s", "find all entries by:", "3\n");
   printf("%30s %3s", "update entry:", "4\n");
   printf("%30s %3s", "print database:", "5\n");
+  printf("%30s %3s", "exit program:", "6\n");
   printf("\n\n");
 }
 
@@ -445,11 +481,6 @@ void startMenu() {
   fflush(stdin);
   scanf("%d", &operationCode);
 
-  if (operationCode <= 0 || operationCode > 5) {
-    startMenu();
-    return;
-  }
-
   switch (operationCode) {
     case 1: {
       struct footballerType footballer;
@@ -462,10 +493,7 @@ void startMenu() {
     case 2: {
       int entryId;
 
-      printf("Enter footballer id: ");
-
-      fflush(stdin);
-      scanf("%d", &entryId);
+      getEntryIdByUser(&entryId);
 
       deleteEntryById(FILE_NAME, entryId);
       break;
@@ -476,12 +504,25 @@ void startMenu() {
       break;
     }
 
-    case 4:
-      break;
+    case 4: {
+      int entryId;
+      struct footballerType footballer;
 
-    case 5:
+      getEntryIdByUser(&entryId);
+      getFootballerByUser(&footballer);
+
+      updateEntryById(FILE_NAME, entryId, footballer);
+      break;
+    }
+
+    case 5: {
       printBinaryFile(FILE_NAME);
       break;
+    }
+
+    case 6: {
+      return;
+    }
   }
 
   printf("\n");
@@ -512,16 +553,16 @@ int main() {
   createBinaryFile(FILE_NAME, footballer);
 
    struct footballerType alex = {
-    .fullName="Kachmazov Alex Volphram",
+    .fullName="Alex",
     .clubName="Innopolis",
     .role="Guardian",
     .age=4,
     .numberOfGames=5,
-    .numberOfGoals=6,
+    .numberOfGoals=3,
   };
 
    struct footballerType igor = {
-    .fullName="Kuzmenkov Igor Druid",
+    .fullName="Igor",
     .clubName="Innopolis",
     .role="Goalkeeper",
     .age=1,
@@ -529,8 +570,88 @@ int main() {
     .numberOfGoals=3,
   };
 
+   struct footballerType sasha = {
+    .fullName="Sasha",
+    .clubName="ITMO",
+    .role="Guardian",
+    .age=2,
+    .numberOfGames=5,
+    .numberOfGoals=1,
+  };
+
+   struct footballerType sasha1 = {
+    .fullName="Sasha",
+    .clubName="Innopolis",
+    .role="Forward",
+    .age=5,
+    .numberOfGames=2,
+    .numberOfGoals=3,
+  };
+
+  struct footballerType sasha2 = {
+    .fullName="Sasha",
+    .clubName="BAM234",
+    .role="Forward",
+    .age=1,
+    .numberOfGames=3,
+    .numberOfGoals=2,
+  };
+
+  struct footballerType alex1 = {
+    .fullName="Alex",
+    .clubName="BAM233",
+    .role="Forward",
+    .age=2,
+    .numberOfGames=4,
+    .numberOfGoals=5,
+  };
+
+  struct footballerType kostya = {
+    .fullName="Kostya",
+    .clubName="BAM234",
+    .role="Goalkeeper",
+    .age=1,
+    .numberOfGames=5,
+    .numberOfGoals=3,
+  };
+
+  struct footballerType kostya1 = {
+    .fullName="Kostya",
+    .clubName="BAM233",
+    .role="Guardian",
+    .age=2,
+    .numberOfGames=2,
+    .numberOfGoals=2,
+  };
+
+  struct footballerType nadya = {
+    .fullName="Nadya",
+    .clubName="BAM231",
+    .role="Guardian",
+    .age=3,
+    .numberOfGames=3,
+    .numberOfGoals=3,
+  };
+
+  struct footballerType sonya = {
+    .fullName="Sonya",
+    .clubName="BAM232",
+    .role="Goalkeeper",
+    .age=1,
+    .numberOfGames=5,
+    .numberOfGoals=4,
+  };
+
+  appendEntry(FILE_NAME, sasha2);
   appendEntry(FILE_NAME, alex);
+  appendEntry(FILE_NAME, sasha);
+  appendEntry(FILE_NAME, kostya1);
+  appendEntry(FILE_NAME, sonya);
   appendEntry(FILE_NAME, igor);
+  appendEntry(FILE_NAME, sasha1);
+  appendEntry(FILE_NAME, alex1);
+  appendEntry(FILE_NAME, kostya);
+  appendEntry(FILE_NAME, nadya);
 
   // findAllEntriesByFullName(FILE_NAME, "Keyer Alexander Petrovich");
   // findAllEntriesByClubName(FILE_NAME, "sfdsfh");
