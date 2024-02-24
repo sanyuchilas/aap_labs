@@ -6,7 +6,7 @@
 #include <io.h>
 
 #define FILE_NAME "footbaler.bin"
-#define INPUT_TYPE 'a'
+#define INPUT_TYPE 'u'
 
 void printEntry(struct footballerType entry) {
   printf("%s, %s, %s, %d, %d, %d\n", entry.fullName, entry.clubName, entry.role, entry.age, entry.numberOfGames, entry.numberOfGoals);
@@ -15,6 +15,7 @@ void printEntry(struct footballerType entry) {
 void getFootballerFullNameByUser(char fullName[fieldLength]) {
   printf("Enter full name: ");
 
+  fflush(stdin);
   fgets(fullName, fieldLength, stdin);
   fullName[strcspn(fullName, "\n")] = 0;
 }
@@ -22,6 +23,7 @@ void getFootballerFullNameByUser(char fullName[fieldLength]) {
 void getFootballerClubNameByUser(char clubName[fieldLength]) {
   printf("Enter club name: ");
 
+  fflush(stdin);
   fgets(clubName, fieldLength, stdin);
   clubName[strcspn(clubName, "\n")] = 0;
 }
@@ -29,37 +31,39 @@ void getFootballerClubNameByUser(char clubName[fieldLength]) {
 void getFootballerRoleByUser(char role[fieldLength]) {
   printf("Enter role: ");
 
+  fflush(stdin);
   fgets(role, fieldLength, stdin);
   role[strcspn(role, "\n")] = 0;
 }
 
-void getFootballerAgeByUser(int age) {
+void getFootballerAgeByUser(int *age) {
   printf("Enter age: ");
   
-  scanf("%d", &age);
+  fflush(stdin);
+  scanf("%d", age);
 }
 
-void getFootballerNumberOfGamesByUser(int numberOfGames) {
+void getFootballerNumberOfGamesByUser(int *numberOfGames) {
   printf("Enter number of games: ");
 
-  scanf("%d", &numberOfGames);
+  fflush(stdin);
+  scanf("%d", numberOfGames);
 }
 
-void getFootballerNumberOfGoalsByUser(int numberOfGoals) {
+void getFootballerNumberOfGoalsByUser(int *numberOfGoals) {
   printf("Enter count of goals: ");
 
-  scanf("%d", &numberOfGoals);
+  fflush(stdin);
+  scanf("%d", numberOfGoals);
 }
 
-void getFootballerByUser(struct footballerType footballer) {
-  fflush(stdin);
-
-  getFootballerFullNameByUser(footballer.fullName);
-  getFootballerClubNameByUser(footballer.clubName);
-  getFootballerRoleByUser(footballer.role);
-  getFootballerAgeByUser(footballer.age);
-  getFootballerNumberOfGamesByUser(footballer.numberOfGames);
-  getFootballerNumberOfGoalsByUser(footballer.numberOfGoals);
+void getFootballerByUser(struct footballerType *footballer) {
+  getFootballerFullNameByUser(footballer->fullName);
+  getFootballerClubNameByUser(footballer->clubName);
+  getFootballerRoleByUser(footballer->role);
+  getFootballerAgeByUser(&(footballer->age));
+  getFootballerNumberOfGamesByUser(&(footballer->numberOfGames));
+  getFootballerNumberOfGoalsByUser(&(footballer->numberOfGoals));
 }
 
 int getFileLength(FILE *f) {
@@ -350,16 +354,6 @@ void printBinaryFile(char *fileName) {
   fclose(f);
 }
 
-void printMainOperationsList() {
-  printf("\n");
-  printf("%30s %3s", "append entry:", "1\n");
-  printf("%30s %3s", "delete entry:", "2\n");
-  printf("%30s %3s", "find all entries by:", "3\n");
-  printf("%30s %3s", "update entry:", "4\n");
-  printf("%30s %3s", "print database:", "5\n");
-  printf("\n\n");
-}
-
 void printFindAllOperationsList() {
   printf("\n");
   printf("%30s %3s", "full name:", "1\n");
@@ -381,8 +375,6 @@ void startFindAllEntriesMenu() {
   fflush(stdin);
   scanf("%d", &operationCode);
 
-  printf("%d", operationCode);
-
   if (operationCode <= 0 || operationCode > 6) {
     startFindAllEntriesMenu();
     return;
@@ -390,30 +382,57 @@ void startFindAllEntriesMenu() {
 
   switch (operationCode) {
     case 1: {
-
+      char fullName[fieldLength];
+      getFootballerFullNameByUser(fullName);
+      findAllEntriesByFullName(FILE_NAME, fullName);
       break;
     }
 
     case 2: {
+      char clubName[fieldLength];
+      getFootballerClubNameByUser(clubName);
+      findAllEntriesByClubName(FILE_NAME, clubName);
       break;
     }
 
     case 3: {
+      char role[fieldLength];
+      getFootballerRoleByUser(role);
+      findAllEntriesByRole(FILE_NAME, role);
       break;
     }
 
     case 4: {
+      int age;
+      getFootballerAgeByUser(age);
+      findAllEntriesByAge(FILE_NAME, &age);
       break;
     }
 
     case 5: {
+      int numberOfGoals;
+      getFootballerNumberOfGoalsByUser(numberOfGoals);
+      findAllEntriesByNumberOfGoals(FILE_NAME, &numberOfGoals);
       break;
     }
 
     case 6: {
+      int numberOfGames;
+      getFootballerNumberOfGamesByUser(numberOfGames);
+      findAllEntriesByNumberOfGames(FILE_NAME, &numberOfGames);
       break;
     }
   }
+}
+
+void printMainOperationsList() {
+  printf("\n");
+  printf("%30s %3s", "append entry:", "1\n");
+  printf("%30s %3s", "delete entry:", "2\n");
+  printf("%30s %3s", "find all entries by:", "3\n");
+  printf("%30s %3s", "update entry:", "4\n");
+  printf("%30s %3s", "print database:", "5\n");
+  printf("\n\n");
 }
 
 void startMenu() {
@@ -435,7 +454,7 @@ void startMenu() {
     case 1: {
       struct footballerType footballer;
 
-      getFootballerByUser(footballer);
+      getFootballerByUser(&footballer);
       appendEntry(FILE_NAME, footballer);
       break;
     }
@@ -461,6 +480,7 @@ void startMenu() {
       break;
 
     case 5:
+      printBinaryFile(FILE_NAME);
       break;
   }
 
@@ -474,7 +494,7 @@ int main() {
 
   struct footballerType footballer;
 
-  getFootballerByUser(footballer);
+  getFootballerByUser(&footballer);
 
   #else
   printf("Input from array.\n");
