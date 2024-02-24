@@ -1,4 +1,5 @@
 #include "football.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,6 +10,56 @@
 
 void printEntry(struct footballerType entry) {
   printf("%s, %s, %s, %d, %d, %d\n", entry.fullName, entry.clubName, entry.role, entry.age, entry.numberOfGames, entry.numberOfGoals);
+}
+
+void getFootballerFullNameByUser(char fullName[fieldLength]) {
+  printf("Enter full name: ");
+
+  fgets(fullName, fieldLength, stdin);
+  fullName[strcspn(fullName, "\n")] = 0;
+}
+
+void getFootballerClubNameByUser(char clubName[fieldLength]) {
+  printf("Enter club name: ");
+
+  fgets(clubName, fieldLength, stdin);
+  clubName[strcspn(clubName, "\n")] = 0;
+}
+
+void getFootballerRoleByUser(char role[fieldLength]) {
+  printf("Enter role: ");
+
+  fgets(role, fieldLength, stdin);
+  role[strcspn(role, "\n")] = 0;
+}
+
+void getFootballerAgeByUser(int age) {
+  printf("Enter age: ");
+  
+  scanf("%d", &age);
+}
+
+void getFootballerNumberOfGamesByUser(int numberOfGames) {
+  printf("Enter number of games: ");
+
+  scanf("%d", &numberOfGames);
+}
+
+void getFootballerNumberOfGoalsByUser(int numberOfGoals) {
+  printf("Enter count of goals: ");
+
+  scanf("%d", &numberOfGoals);
+}
+
+void getFootballerByUser(struct footballerType footballer) {
+  fflush(stdin);
+
+  getFootballerFullNameByUser(footballer.fullName);
+  getFootballerClubNameByUser(footballer.clubName);
+  getFootballerRoleByUser(footballer.role);
+  getFootballerAgeByUser(footballer.age);
+  getFootballerNumberOfGamesByUser(footballer.numberOfGames);
+  getFootballerNumberOfGoalsByUser(footballer.numberOfGoals);
 }
 
 int getFileLength(FILE *f) {
@@ -56,7 +107,7 @@ void deleteEntryById(char *fileName, int entryId) {
   struct footballerType tmpEntry;
   struct footballerType deletedEntry;
 
-  if (entryId >= fileLength) {
+  if (entryId >= fileLength || entryId < 0) {
     printf("Couldn't delete entry.\n");
     return;
   }
@@ -309,40 +360,112 @@ void printMainOperationsList() {
   printf("\n\n");
 }
 
+void printFindAllOperationsList() {
+  printf("\n");
+  printf("%30s %3s", "full name:", "1\n");
+  printf("%30s %3s", "club name:", "2\n");
+  printf("%30s %3s", "role:", "3\n");
+  printf("%30s %3s", "age:", "4\n");
+  printf("%30s %3s", "number of goals:", "5\n");
+  printf("%30s %3s", "number of games:", "6\n");
+  printf("\n\n");
+}
+
+void startFindAllEntriesMenu() {
+  printf("\n");
+  printFindAllOperationsList();
+  printf("Enter correct find all code: ");
+
+  int operationCode = 0;
+
+  fflush(stdin);
+  scanf("%d", &operationCode);
+
+  printf("%d", operationCode);
+
+  if (operationCode <= 0 || operationCode > 6) {
+    startFindAllEntriesMenu();
+    return;
+  }
+
+  switch (operationCode) {
+    case 1: {
+
+      break;
+    }
+
+    case 2: {
+      break;
+    }
+
+    case 3: {
+      break;
+    }
+
+    case 4: {
+      break;
+    }
+
+    case 5: {
+      break;
+    }
+
+    case 6: {
+      break;
+    }
+  }
+}
+
 void startMenu() {
   printf("\n");
   printMainOperationsList();
   printf("Enter correct operation code: ");
 
-  char operationCode = '0';
+  int operationCode = 0;
 
-  scanf("%c", &operationCode);
+  fflush(stdin);
+  scanf("%d", &operationCode);
 
-  if (operationCode <= 48 || operationCode > 53) {
-    fflush(stdin);
+  if (operationCode <= 0 || operationCode > 5) {
     startMenu();
     return;
   }
 
   switch (operationCode) {
-    case '1':
+    case 1: {
+      struct footballerType footballer;
+
+      getFootballerByUser(footballer);
+      appendEntry(FILE_NAME, footballer);
+      break;
+    }
+
+    case 2: {
+      int entryId;
+
+      printf("Enter footballer id: ");
+
+      fflush(stdin);
+      scanf("%d", &entryId);
+
+      deleteEntryById(FILE_NAME, entryId);
+      break;
+    }
+
+    case 3: {
+      startFindAllEntriesMenu();
+      break;
+    }
+
+    case 4:
       break;
 
-    case '2':
-      break;
-
-    case '3':
-      break;
-
-    case '4':
-      break;
-      
-    case '5':
+    case 5:
       break;
   }
 
   printf("\n");
-  // startMenu();
+  startMenu();
 }
 
 int main() {
@@ -351,26 +474,7 @@ int main() {
 
   struct footballerType footballer;
 
-  printf("Enter full name: ");
-  fgets(footballer.fullName, fieldLength, stdin);
-  footballer.fullName[strcspn(footballer.fullName, "\n")] = 0;
-
-  printf("Enter club name: ");
-  fgets(footballer.clubName, fieldLength, stdin);
-  footballer.clubName[strcspn(footballer.clubName, "\n")] = 0;
-
-  printf("Enter role: ");
-  fgets(footballer.role, fieldLength, stdin);
-  footballer.role[strcspn(footballer.role, "\n")] = 0;
-
-  printf("Enter age: ");
-  scanf("%d", &footballer.age);
-
-  printf("Enter number of games: ");
-  scanf("%d", &footballer.numberOfGames);
-
-  printf("Enter count of goals: ");
-  scanf("%d", &footballer.numberOfGoals);
+  getFootballerByUser(footballer);
 
   #else
   printf("Input from array.\n");
