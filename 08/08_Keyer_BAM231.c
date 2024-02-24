@@ -299,8 +299,50 @@ void printBinaryFile(char *fileName) {
   fclose(f);
 }
 
+void printMainOperationsList() {
+  printf("\n");
+  printf("%30s %3s", "append entry:", "1\n");
+  printf("%30s %3s", "delete entry:", "2\n");
+  printf("%30s %3s", "find all entries by:", "3\n");
+  printf("%30s %3s", "update entry:", "4\n");
+  printf("%30s %3s", "print database:", "5\n");
+  printf("\n\n");
+}
+
 void startMenu() {
-  printf("Enter operation code: ");
+  printf("\n");
+  printMainOperationsList();
+  printf("Enter correct operation code: ");
+
+  char operationCode = '0';
+
+  scanf("%c", &operationCode);
+
+  if (operationCode <= 48 || operationCode > 53) {
+    fflush(stdin);
+    startMenu();
+    return;
+  }
+
+  switch (operationCode) {
+    case '1':
+      break;
+
+    case '2':
+      break;
+
+    case '3':
+      break;
+
+    case '4':
+      break;
+      
+    case '5':
+      break;
+  }
+
+  printf("\n");
+  // startMenu();
 }
 
 int main() {
@@ -366,22 +408,22 @@ int main() {
   appendEntry(FILE_NAME, alex);
   appendEntry(FILE_NAME, igor);
 
-  findAllEntriesByFullName(FILE_NAME, "Keyer Alexander Petrovich");
-  findAllEntriesByClubName(FILE_NAME, "sfdsfh");
-  findAllEntriesByRole(FILE_NAME, "Goalkeeper");
-  findAllEntriesByAge(FILE_NAME, 1);
-  findAllEntriesByNumberOfGames(FILE_NAME, 5);
-  findAllEntriesByNumberOfGoals(FILE_NAME, 3);
+  // findAllEntriesByFullName(FILE_NAME, "Keyer Alexander Petrovich");
+  // findAllEntriesByClubName(FILE_NAME, "sfdsfh");
+  // findAllEntriesByRole(FILE_NAME, "Goalkeeper");
+  // findAllEntriesByAge(FILE_NAME, 1);
+  // findAllEntriesByNumberOfGames(FILE_NAME, 5);
+  // findAllEntriesByNumberOfGoals(FILE_NAME, 3);
 
-  printBinaryFile(FILE_NAME);
-  printf("\n");
-  deleteEntryById(FILE_NAME, 1);
-  printf("\n");
-  printBinaryFile(FILE_NAME);
+  // printBinaryFile(FILE_NAME);
+  // printf("\n");
+  // deleteEntryById(FILE_NAME, 1);
+  // printf("\n");
+  // printBinaryFile(FILE_NAME);
 
-  printBinaryFile(FILE_NAME);
-  updateEntryById(FILE_NAME, 0, alex);
-  printBinaryFile(FILE_NAME);
+  // printBinaryFile(FILE_NAME);
+  // updateEntryById(FILE_NAME, 0, alex);
+  // printBinaryFile(FILE_NAME);
 
   startMenu();
 
