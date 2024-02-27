@@ -653,23 +653,6 @@ int main() {
   appendEntry(FILE_NAME, kostya);
   appendEntry(FILE_NAME, nadya);
 
-  // findAllEntriesByFullName(FILE_NAME, "Keyer Alexander Petrovich");
-  // findAllEntriesByClubName(FILE_NAME, "sfdsfh");
-  // findAllEntriesByRole(FILE_NAME, "Goalkeeper");
-  // findAllEntriesByAge(FILE_NAME, 1);
-  // findAllEntriesByNumberOfGames(FILE_NAME, 5);
-  // findAllEntriesByNumberOfGoals(FILE_NAME, 3);
-
-  // printBinaryFile(FILE_NAME);
-  // printf("\n");
-  // deleteEntryById(FILE_NAME, 1);
-  // printf("\n");
-  // printBinaryFile(FILE_NAME);
-
-  // printBinaryFile(FILE_NAME);
-  // updateEntryById(FILE_NAME, 0, alex);
-  // printBinaryFile(FILE_NAME);
-
   startMenu();
 
   return 0;
