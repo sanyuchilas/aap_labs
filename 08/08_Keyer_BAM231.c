@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <io.h>
 
-#define FILE_NAME "footbaler.bin"
+#define FILE_NAME "footballer.bin"
 #define INPUT_TYPE 'a'
 
 void printHr(int length) {
