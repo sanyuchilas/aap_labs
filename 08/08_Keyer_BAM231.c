@@ -21,7 +21,7 @@ void printTableHeader() {
   printHr(65);
 }
 
-void printEntry(struct footballerType entry, int id) {
+void printFootballer(struct footballerType entry, int id) {
   printf("%2d|%30s|%30s|%30s|%10d|%10d|%10d|\n", id, entry.fullName, entry.clubName, entry.role, entry.age, entry.numberOfGames, entry.numberOfGoals);
   printHr(65);
 }
@@ -171,7 +171,7 @@ void findAllEntriesByFullName(char *fileName, char fieldValue[fieldLength]) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (!strcmp(entry.fullName, fieldValue)) {
-      printEntry(entry, i);
+      printFootballer(entry, i);
       entriesCount++;
     }
   }
@@ -203,7 +203,7 @@ void findAllEntriesByClubName(char *fileName, char fieldValue[fieldLength]) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (!strcmp(entry.clubName, fieldValue)) {
-      printEntry(entry, i);
+      printFootballer(entry, i);
       entriesCount++;
     }
   }
@@ -235,7 +235,7 @@ void findAllEntriesByRole(char *fileName, char fieldValue[fieldLength]) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (!strcmp(entry.role, fieldValue)) {
-      printEntry(entry, i);
+      printFootballer(entry, i);
       entriesCount++;
     }
   }
@@ -267,7 +267,7 @@ void findAllEntriesByAge(char *fileName, int fieldValue) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (entry.age == fieldValue) {
-      printEntry(entry, i);
+      printFootballer(entry, i);
       entriesCount++;
     }
   }
@@ -299,7 +299,7 @@ void findAllEntriesByNumberOfGames(char *fileName, int fieldValue) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (entry.numberOfGames == fieldValue) {
-      printEntry(entry, i);
+      printFootballer(entry, i);
       entriesCount++;
     }
   }
@@ -331,7 +331,7 @@ void findAllEntriesByNumberOfGoals(char *fileName, int fieldValue) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
     if (entry.numberOfGoals == fieldValue) {
-      printEntry(entry, i);
+      printFootballer(entry, i);
       entriesCount++;
     }
   }
@@ -381,7 +381,7 @@ void printBinaryFile(char *fileName) {
   int i = 0;
   
   while (!feof(f)) {
-    printEntry(entry, i++);
+    printFootballer(entry, i++);
 
     fread(&entry, sizeof(struct footballerType), 1, f);
   }
