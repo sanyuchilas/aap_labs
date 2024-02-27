@@ -73,34 +73,34 @@ struct footballerType* generateFootballersArray(int length) {
   return arr;
 }
 
-int compareFootballers(struct footballerType footballer1, struct footballerType footballer2) {
+int compareFootballers(struct footballerType footballer1, struct footballerType footballer2, int reverse) {
   int cmpFullNames = strcmp(footballer1.fullName, footballer2.fullName);
 
   if (cmpFullNames != 0) {
-    return cmpFullNames;    
+    return reverse * cmpFullNames;    
   }
 
   int cmpClubNames = strcmp(footballer1.clubName, footballer2.clubName);
 
   if (cmpClubNames != 0) {
-    return cmpClubNames;    
+    return reverse * cmpClubNames;    
   }
 
   int cmpRole = strcmp(footballer1.role, footballer2.role);
 
   if (cmpRole != 0) {
-    return cmpRole;    
+    return reverse * cmpRole;    
   }
 
   if (footballer1.age != footballer2.age) {
-    return footballer1.age - footballer2.age;
+    return reverse * (footballer1.age - footballer2.age);
   }
 
   if (footballer1.numberOfGames != footballer2.numberOfGames) {
-    return footballer1.numberOfGames - footballer2.numberOfGames;
+    return reverse * (footballer1.numberOfGames - footballer2.numberOfGames);
   }
   if (footballer1.numberOfGoals != footballer2.numberOfGoals) {
-    return footballer1.numberOfGoals - footballer2.numberOfGoals;
+    return reverse * (footballer1.numberOfGoals - footballer2.numberOfGoals);
   }
 }
 
