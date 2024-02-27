@@ -4,6 +4,7 @@
 #include <stdlib.h> // Memory allocation.
 #include <time.h> // Time library.
 #include <assert.h> // Assertion library.
+#include <string.h> // String functions library.
 
 void printHr(int length) {
   for (int j = 0; j < length; j++) {
@@ -72,10 +73,41 @@ struct footballerType* generateFootballersArray(int length) {
   return arr;
 }
 
+int compareFootballers(struct footballerType footballer1, struct footballerType footballer2) {
+  int cmpFullNames = strcmp(footballer1.fullName, footballer2.fullName);
+
+  if (cmpFullNames != 0) {
+    return cmpFullNames;    
+  }
+
+  int cmpClubNames = strcmp(footballer1.clubName, footballer2.clubName);
+
+  if (cmpClubNames != 0) {
+    return cmpClubNames;    
+  }
+
+  int cmpRole = strcmp(footballer1.role, footballer2.role);
+
+  if (cmpRole != 0) {
+    return cmpRole;    
+  }
+
+  if (footballer1.age != footballer2.age) {
+    return footballer1.age - footballer2.age;
+  }
+
+  if (footballer1.numberOfGames != footballer2.numberOfGames) {
+    return footballer1.numberOfGames - footballer2.numberOfGames;
+  }
+  if (footballer1.numberOfGoals != footballer2.numberOfGoals) {
+    return footballer1.numberOfGoals - footballer2.numberOfGoals;
+  }
+}
+
 int main() {
   srand(time(NULL)); // Init first random number.
 
-  int n = 1000;
+  int n = 10;
   struct footballerType* arr = generateFootballersArray(n);
 
   printFootballers(arr, n);
