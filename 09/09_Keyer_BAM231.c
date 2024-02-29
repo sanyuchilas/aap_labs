@@ -52,9 +52,9 @@ char* generateString(int length, int countOfUsedSymbols) {
 
 struct footballerType generateFootballer() {
   struct footballerType out = {
-    .fullName=generateString(2, 26),
-    .clubName=generateString(2, 26),
-    .role=generateString(2, 26),
+    .fullName=generateString(2, 1),
+    .clubName=generateString(2, 1),
+    .role=generateString(2, 1),
     .age=(rand() % 100),
     .numberOfGames=(rand() % 100),
     .numberOfGoals=(rand() % 100),
@@ -105,10 +105,12 @@ int compareFootballers(struct footballerType footballer1, struct footballerType 
 }
 
 void bubbleSort(struct footballerType* arr, int n, char direction) {
+  struct footballerType tmp;
+
   for (int i = n - 1; i >= 0; i--) {
     for (int j = 0; j < i; j++) {
       if (compareFootballers(arr[j], arr[j + 1], direction) > 0) {
-        struct footballerType tmp = arr[j + 1];
+        tmp = arr[j + 1];
         arr[j + 1] = arr[j];
         arr[j] = tmp;
       }
@@ -118,6 +120,23 @@ void bubbleSort(struct footballerType* arr, int n, char direction) {
   printf("Successfully bubble sort.\n");
 }
 
+void insertSort(struct footballerType* arr, int n, char direction) {
+  int j;
+  struct footballerType tmp;
+
+  for (int i = 1; i < n; i++) {
+    tmp = arr[i];
+
+    for (j = i - 1; j >= 0 && compareFootballers(arr[j], tmp, direction) > 0; j--) {
+      arr[j + 1] = arr[j];
+    }
+
+    arr[j + 1] = tmp;
+  }
+
+  printf("Successfully insert sort.\n");
+}
+
 int main() {
   srand(time(NULL)); // Init first random number.
 
@@ -125,7 +144,7 @@ int main() {
   struct footballerType* arr = generateFootballersArray(n);
 
   printFootballers(arr, n);
-  // bubbleSort(arr, n, 1);
+  // insertSort(arr, n, -1);
   // printFootballers(arr, n);
 
   return 0;
