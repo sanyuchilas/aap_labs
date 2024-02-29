@@ -73,35 +73,49 @@ struct footballerType* generateFootballersArray(int length) {
   return arr;
 }
 
-int compareFootballers(struct footballerType footballer1, struct footballerType footballer2, int reverse) {
+int compareFootballers(struct footballerType footballer1, struct footballerType footballer2, int direction) {
   int cmpFullNames = strcmp(footballer1.fullName, footballer2.fullName);
 
   if (cmpFullNames != 0) {
-    return reverse * cmpFullNames;    
+    return direction * cmpFullNames;    
   }
 
   int cmpClubNames = strcmp(footballer1.clubName, footballer2.clubName);
 
   if (cmpClubNames != 0) {
-    return reverse * cmpClubNames;    
+    return direction * cmpClubNames;    
   }
 
   int cmpRole = strcmp(footballer1.role, footballer2.role);
 
   if (cmpRole != 0) {
-    return reverse * cmpRole;    
+    return direction * cmpRole;    
   }
 
   if (footballer1.age != footballer2.age) {
-    return reverse * (footballer1.age - footballer2.age);
+    return direction * (footballer1.age - footballer2.age);
   }
 
   if (footballer1.numberOfGames != footballer2.numberOfGames) {
-    return reverse * (footballer1.numberOfGames - footballer2.numberOfGames);
+    return direction * (footballer1.numberOfGames - footballer2.numberOfGames);
   }
   if (footballer1.numberOfGoals != footballer2.numberOfGoals) {
-    return reverse * (footballer1.numberOfGoals - footballer2.numberOfGoals);
+    return direction * (footballer1.numberOfGoals - footballer2.numberOfGoals);
   }
+}
+
+void bubbleSort(struct footballerType* arr, int n, char direction) {
+  for (int i = n - 1; i >= 0; i--) {
+    for (int j = 0; j < i; j++) {
+      if (compareFootballers(arr[j], arr[j + 1], direction) > 0) {
+        struct footballerType tmp = arr[j + 1];
+        arr[j + 1] = arr[j];
+        arr[j] = tmp;
+      }
+    }
+  }
+
+  printf("Successfully bubble sort.\n");
 }
 
 int main() {
@@ -111,6 +125,8 @@ int main() {
   struct footballerType* arr = generateFootballersArray(n);
 
   printFootballers(arr, n);
+  // bubbleSort(arr, n, 1);
+  // printFootballers(arr, n);
 
   return 0;
 }
