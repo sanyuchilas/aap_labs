@@ -64,12 +64,12 @@ char* generateString(int length, int countOfUsedSymbols) {
 
 struct footballerType generateFootballer() {
   struct footballerType out = {
-    .fullName=generateString(3, 3),
-    .clubName=generateString(3, 3),
-    .role=generateString(3, 3),
-    .age=(rand() % 10),
-    .numberOfGames=(rand() % 10),
-    .numberOfGoals=(rand() % 10),
+    .fullName=generateString(20, 26),
+    .clubName=generateString(20, 26),
+    .role=generateString(20, 26),
+    .age=(rand() % 100),
+    .numberOfGames=(rand() % 100),
+    .numberOfGoals=(rand() % 100),
   };
 
   return out;
@@ -82,7 +82,7 @@ struct footballerType* generateFootballersArray(int length) {
     arr[i] = generateFootballer();
   }
 
-  printf("Successfully generated %d footballers array.", length);
+  // printf("Successfully generated %d footballers array.\n", length);
   return arr;
 }
 
@@ -138,7 +138,7 @@ void bubbleSort(struct footballerType* arr, int n, char direction) {
   }
   clock_t stop = clock();
 
-  printf("Successfully sort in: %.03fs\n", (double)(stop - start) / CLOCKS_PER_SEC);
+  printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
 void insertSort(struct footballerType* arr, int n, char direction) {
@@ -164,7 +164,7 @@ void insertSort(struct footballerType* arr, int n, char direction) {
 
   clock_t stop = clock();
 
-  printf("Successfully sort in: %.03fs\n", (double)(stop - start) / CLOCKS_PER_SEC);
+  printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
 void shakerSort(struct footballerType* arr, int n, char direction) {
@@ -199,7 +199,7 @@ void shakerSort(struct footballerType* arr, int n, char direction) {
 
   clock_t stop = clock();
 
-  printf("Successfully sort in: %.03fs\n", (double)(stop - start) / CLOCKS_PER_SEC);
+  printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
 void merge(struct footballerType* arr, int l, int m, int r, char direction) {
@@ -263,7 +263,7 @@ void mergeSort(struct footballerType* arr, int n, char direction) {
   splitAndMerge(arr, 0, n - 1, direction);
   clock_t stop = clock();
 
-  printf("Successfully sort in: %.03fs\n", (double)(stop - start) / CLOCKS_PER_SEC);
+  printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
 void printMainMenuOperationsList() {
@@ -339,13 +339,62 @@ void startMainMenu(struct footballerType* arr, int *pn) {
   startMainMenu(arr, pn);
 }
 
+void runTests() {
+  printf("Sort by insertions.\n\n");
+
+  insertSort(generateFootballersArray(100), 100, 1);
+  insertSort(generateFootballersArray(1000), 1000, 1);
+  insertSort(generateFootballersArray(5000), 5000, 1);
+  insertSort(generateFootballersArray(10000), 10000, 1);
+  insertSort(generateFootballersArray(20000), 20000, 1);
+  insertSort(generateFootballersArray(50000), 50000, 1);
+  insertSort(generateFootballersArray(100000), 100000, 1);
+
+  printf("\n----------\n\n");
+
+  printf("Bubble sort.\n\n");
+
+  bubbleSort(generateFootballersArray(100), 100, 1);
+  bubbleSort(generateFootballersArray(1000), 1000, 1);
+  bubbleSort(generateFootballersArray(5000), 5000, 1);
+  bubbleSort(generateFootballersArray(10000), 10000, 1);
+  bubbleSort(generateFootballersArray(20000), 20000, 1);
+  bubbleSort(generateFootballersArray(50000), 50000, 1);
+  bubbleSort(generateFootballersArray(100000), 100000, 1);
+
+  printf("\n----------\n\n");
+
+  printf("Shaker sort.\n\n");
+
+  shakerSort(generateFootballersArray(100), 100, 1);
+  shakerSort(generateFootballersArray(1000), 1000, 1);
+  shakerSort(generateFootballersArray(5000), 5000, 1);
+  shakerSort(generateFootballersArray(10000), 10000, 1);
+  shakerSort(generateFootballersArray(20000), 20000, 1);
+  shakerSort(generateFootballersArray(50000), 50000, 1);
+  shakerSort(generateFootballersArray(100000), 100000, 1);
+
+  printf("\n----------\n\n");
+  
+  printf("Merge sort.\n\n");
+
+  mergeSort(generateFootballersArray(100), 100, 1);
+  mergeSort(generateFootballersArray(1000), 1000, 1);
+  mergeSort(generateFootballersArray(5000), 5000, 1);
+  mergeSort(generateFootballersArray(10000), 10000, 1);
+  mergeSort(generateFootballersArray(20000), 20000, 1);
+  mergeSort(generateFootballersArray(50000), 50000, 1);
+  mergeSort(generateFootballersArray(100000), 100000, 1);
+}
+
 int main() {
   srand(time(NULL)); // Init first random number.
 
   struct footballerType* arr = NULL;
   int *pn;
 
-  startMainMenu(arr, pn);
+  // startMainMenu(arr, pn);
+  runTests();
 
   return 0;
 }
