@@ -55,9 +55,9 @@ struct footballerType generateFootballer() {
     .fullName=generateString(2, 1),
     .clubName=generateString(2, 1),
     .role=generateString(2, 1),
-    .age=(rand() % 100),
-    .numberOfGames=(rand() % 100),
-    .numberOfGoals=(rand() % 100),
+    .age=(rand() % 50),
+    .numberOfGames=(rand() % 50),
+    .numberOfGoals=(rand() % 50),
   };
 
   return out;
@@ -137,6 +137,32 @@ void insertSort(struct footballerType* arr, int n, char direction) {
   printf("Successfully insert sort.\n");
 }
 
+void shakerSort(struct footballerType* arr, int n, char direction) {
+  struct footballerType tmp;
+  int  l = 1, r = n;
+  int j;
+
+  do {
+    for(j = --r; j >= l; j--) {
+      if (compareFootballers(arr[j - 1], arr[j], direction) > 0) {
+        tmp = arr[j - 1];
+        arr[j - 1] = arr[j];
+        arr[j] = tmp;
+      }
+    }
+
+    for (j = ++l; j <= r; j++) {
+      if (compareFootballers(arr[j - 1], arr[j], direction) > 0) {
+        tmp = arr[j - 1];
+        arr[j - 1] = arr[j];
+        arr[j] = tmp;
+      }
+    }
+  } while (l < r);
+
+  printf("Successfully shaker sort.\n");
+}
+
 int main() {
   srand(time(NULL)); // Init first random number.
 
@@ -144,7 +170,7 @@ int main() {
   struct footballerType* arr = generateFootballersArray(n);
 
   printFootballers(arr, n);
-  // insertSort(arr, n, -1);
+  // shakerSort(arr, n, 1);
   // printFootballers(arr, n);
 
   return 0;
