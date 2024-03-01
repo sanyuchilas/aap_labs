@@ -6,6 +6,13 @@
 #include <assert.h> // Assertion library.
 #include <string.h> // String functions library.
 
+void getSortDirectionByUser(int* direction) {
+  printf("Enter sort direction (1 - increasing, -1 - decreasing): ");
+
+  fflush(stdin);
+  scanf("%d", direction);
+}
+
 void printHr(int length) {
   for (int j = 0; j < length; j++) {
       printf("- ");
@@ -15,16 +22,21 @@ void printHr(int length) {
 
 void printTableHeader() {
   printHr(65);
-  printf("%2s|%30s|%30s|%30s|%10s|%10s|%10s|\n", "ID", "FULL NAME", "CLUB NAME", "ROLE", "AGE", "GAMES", "GOALS");
+  printf("%4s|%30s|%30s|%30s|%10s|%10s|%10s|\n", "ID", "FULL NAME", "CLUB NAME", "ROLE", "AGE", "GAMES", "GOALS");
   printHr(65);
 }
 
 void printFootballer(struct footballerType footballer, int id) {
-  printf("%2d|%30s|%30s|%30s|%10d|%10d|%10d|\n", id, footballer.fullName, footballer.clubName, footballer.role, footballer.age, footballer.numberOfGames, footballer.numberOfGoals);
+  printf("%4d|%30s|%30s|%30s|%10d|%10d|%10d|\n", id, footballer.fullName, footballer.clubName, footballer.role, footballer.age, footballer.numberOfGames, footballer.numberOfGoals);
   printHr(65);
 }
 
 void printFootballers(struct footballerType* footballers, int length) {
+  if (footballers == NULL) {
+    printf("Incorrect array.\n");
+    return;
+  }
+
   printTableHeader();
 
   for (int i = 0; i < length; i++) {
@@ -52,12 +64,12 @@ char* generateString(int length, int countOfUsedSymbols) {
 
 struct footballerType generateFootballer() {
   struct footballerType out = {
-    .fullName=generateString(2, 1),
-    .clubName=generateString(2, 1),
-    .role=generateString(2, 1),
-    .age=(rand() % 50),
-    .numberOfGames=(rand() % 50),
-    .numberOfGoals=(rand() % 50),
+    .fullName=generateString(3, 3),
+    .clubName=generateString(3, 3),
+    .role=generateString(3, 3),
+    .age=(rand() % 10),
+    .numberOfGames=(rand() % 10),
+    .numberOfGoals=(rand() % 10),
   };
 
   return out;
@@ -70,6 +82,7 @@ struct footballerType* generateFootballersArray(int length) {
     arr[i] = generateFootballer();
   }
 
+  printf("Successfully generated %d footballers array.", length);
   return arr;
 }
 
@@ -105,6 +118,11 @@ int compareFootballers(struct footballerType footballer1, struct footballerType 
 }
 
 void bubbleSort(struct footballerType* arr, int n, char direction) {
+  if (arr == NULL) {
+    printf("Incorrect array.\n");
+    return;
+  }
+
   struct footballerType tmp;
 
   for (int i = n - 1; i >= 0; i--) {
@@ -121,6 +139,11 @@ void bubbleSort(struct footballerType* arr, int n, char direction) {
 }
 
 void insertSort(struct footballerType* arr, int n, char direction) {
+  if (arr == NULL) {
+    printf("Incorrect array.\n");
+    return;
+  }
+
   int j;
   struct footballerType tmp;
 
@@ -138,6 +161,11 @@ void insertSort(struct footballerType* arr, int n, char direction) {
 }
 
 void shakerSort(struct footballerType* arr, int n, char direction) {
+  if (arr == NULL) {
+    printf("Incorrect array.\n");
+    return;
+  }
+
   struct footballerType tmp;
   int  l = 1, r = n;
   int j;
@@ -215,19 +243,95 @@ void splitAndMerge(struct footballerType* arr, int l, int r, char direction) {
 }
 
 void mergeSort(struct footballerType* arr, int n, char direction) {
+  if (arr == NULL) {
+    printf("Incorrect array.\n");
+    return;
+  }
+
   splitAndMerge(arr, 0, n - 1, direction);
   printf("Successfully merge sort.\n");
+}
+
+void printMainMenuOperationsList() {
+  printf("\n");
+  printf("%30s %3s", "generate array:", "1\n");
+  printf("%30s %3s", "sort by insertions:", "2\n");
+  printf("%30s %3s", "bubble sort:", "3\n");
+  printf("%30s %3s", "shaker sort:", "4\n");
+  printf("%30s %3s", "merge sort:", "5\n");
+  printf("%30s %3s", "print array:", "6\n");
+  printf("%30s %3s", "exit program:", "7\n");
+  printf("\n\n");
+}
+
+void startMainMenu(struct footballerType* arr, int *pn) {
+  printf("\n");
+  printMainMenuOperationsList();
+
+  int operationCode = 0;
+  int direction = 1;
+
+  printf("Enter correct operation code: ");
+
+  fflush(stdin);
+  scanf("%d", &operationCode);
+
+  switch (operationCode) {
+    case 1: {
+      printf("Enter footballers count: ");
+      fflush(stdin);
+      scanf("%d", pn);
+
+      arr = generateFootballersArray(*pn);
+
+      break;
+    }
+
+    case 2: {
+      getSortDirectionByUser(&direction);
+      insertSort(arr, *pn, direction);
+      break;
+    }
+
+    case 3: {
+      getSortDirectionByUser(&direction);
+      bubbleSort(arr, *pn, direction);
+      break;
+    }
+
+    case 4: {
+      getSortDirectionByUser(&direction);
+      shakerSort(arr, *pn, direction);
+      break;
+    }
+
+    case 5: {
+      getSortDirectionByUser(&direction);
+      mergeSort(arr, *pn, direction);
+      break;
+    }
+
+    case 6: {
+      printFootballers(arr, *pn);
+      break;
+    }
+
+    case 7: {
+      return;
+    }
+  }
+
+  printf("\n");
+  startMainMenu(arr, pn);
 }
 
 int main() {
   srand(time(NULL)); // Init first random number.
 
-  int n = 10;
-  struct footballerType* arr = generateFootballersArray(n);
+  struct footballerType* arr = NULL;
+  int *pn;
 
-  printFootballers(arr, n);
-  mergeSort(arr, n, -1);
-  printFootballers(arr, n);
+  startMainMenu(arr, pn);
 
   return 0;
 }
