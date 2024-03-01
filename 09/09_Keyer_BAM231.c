@@ -163,6 +163,64 @@ void shakerSort(struct footballerType* arr, int n, char direction) {
   printf("Successfully shaker sort.\n");
 }
 
+void merge(struct footballerType* arr, int l, int m, int r, char direction) {
+  int i = l;
+  int j = m + 1;
+  int k = 0;
+
+  struct footballerType* tmp = (struct footballerType*)malloc(sizeof(struct footballerType) * (l - r + 1));
+
+  while (i <= m && j <= r) {
+    if (compareFootballers(arr[i], arr[j], direction) >= 0) {
+      tmp[k] = arr[j];
+      j++;
+    } else {
+      tmp[k] = arr[i];
+      i++;
+    }
+
+    k++;
+  }
+
+  if (i > m) {
+    while (j <= r) {
+      tmp[k] = arr[j];
+
+      j++;
+      k++;
+    }
+  } else {
+    while (i <= m) {
+      tmp[k] = arr[i];
+
+      i++;
+      k++;
+    }
+  }
+
+
+  for (k = 0; k <= l - r; k++) {
+    arr[l + k] = tmp[k];
+  };
+
+  free(tmp);
+}
+
+void splitAndMerge(struct footballerType* arr, int l, int r, char direction) {
+  if (l < r) {
+    int m = (l + r) / 2;
+    printf("%d %d %d\n", l, m, r);
+    splitAndMerge(arr, l, m, direction);
+    splitAndMerge(arr, m + 1, r, direction);
+    merge(arr, l, m, r, direction);
+  }
+}
+
+void mergeSort(struct footballerType* arr, int n, char direction) {
+  splitAndMerge(arr, 0, n - 1, direction);
+  printf("Successfully merge sort.\n");
+}
+
 int main() {
   srand(time(NULL)); // Init first random number.
 
@@ -170,8 +228,8 @@ int main() {
   struct footballerType* arr = generateFootballersArray(n);
 
   printFootballers(arr, n);
-  // shakerSort(arr, n, 1);
-  // printFootballers(arr, n);
+  mergeSort(arr, n, 1);
+  printFootballers(arr, n);
 
   return 0;
 }
