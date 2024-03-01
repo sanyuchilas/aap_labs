@@ -168,7 +168,7 @@ void merge(struct footballerType* arr, int l, int m, int r, char direction) {
   int j = m + 1;
   int k = 0;
 
-  struct footballerType* tmp = (struct footballerType*)malloc(sizeof(struct footballerType) * (l - r + 1));
+  struct footballerType* tmp = (struct footballerType*)malloc(sizeof(struct footballerType) * (r - l + 1));
 
   while (i <= m && j <= r) {
     if (compareFootballers(arr[i], arr[j], direction) >= 0) {
@@ -198,8 +198,7 @@ void merge(struct footballerType* arr, int l, int m, int r, char direction) {
     }
   }
 
-
-  for (k = 0; k <= l - r; k++) {
+  for (k = 0; k <= r - l; k++) {
     arr[l + k] = tmp[k];
   };
 
@@ -209,7 +208,6 @@ void merge(struct footballerType* arr, int l, int m, int r, char direction) {
 void splitAndMerge(struct footballerType* arr, int l, int r, char direction) {
   if (l < r) {
     int m = (l + r) / 2;
-    printf("%d %d %d\n", l, m, r);
     splitAndMerge(arr, l, m, direction);
     splitAndMerge(arr, m + 1, r, direction);
     merge(arr, l, m, r, direction);
@@ -228,7 +226,7 @@ int main() {
   struct footballerType* arr = generateFootballersArray(n);
 
   printFootballers(arr, n);
-  mergeSort(arr, n, 1);
+  mergeSort(arr, n, -1);
   printFootballers(arr, n);
 
   return 0;
