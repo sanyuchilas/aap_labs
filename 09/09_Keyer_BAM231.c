@@ -125,6 +125,8 @@ void bubbleSort(struct footballerType* arr, int n, char direction) {
 
   struct footballerType tmp;
 
+  clock_t start = clock();
+
   for (int i = n - 1; i >= 0; i--) {
     for (int j = 0; j < i; j++) {
       if (compareFootballers(arr[j], arr[j + 1], direction) > 0) {
@@ -134,8 +136,9 @@ void bubbleSort(struct footballerType* arr, int n, char direction) {
       }
     }
   }
+  clock_t stop = clock();
 
-  printf("Successfully bubble sort.\n");
+  printf("Successfully sort in: %.03fs\n", (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
 void insertSort(struct footballerType* arr, int n, char direction) {
@@ -147,6 +150,8 @@ void insertSort(struct footballerType* arr, int n, char direction) {
   int j;
   struct footballerType tmp;
 
+  clock_t start = clock();
+
   for (int i = 1; i < n; i++) {
     tmp = arr[i];
 
@@ -157,7 +162,9 @@ void insertSort(struct footballerType* arr, int n, char direction) {
     arr[j + 1] = tmp;
   }
 
-  printf("Successfully insert sort.\n");
+  clock_t stop = clock();
+
+  printf("Successfully sort in: %.03fs\n", (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
 void shakerSort(struct footballerType* arr, int n, char direction) {
@@ -165,10 +172,12 @@ void shakerSort(struct footballerType* arr, int n, char direction) {
     printf("Incorrect array.\n");
     return;
   }
-
+  
   struct footballerType tmp;
   int  l = 1, r = n;
   int j;
+
+  clock_t start = clock();
 
   do {
     for(j = --r; j >= l; j--) {
@@ -188,7 +197,9 @@ void shakerSort(struct footballerType* arr, int n, char direction) {
     }
   } while (l < r);
 
-  printf("Successfully shaker sort.\n");
+  clock_t stop = clock();
+
+  printf("Successfully sort in: %.03fs\n", (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
 void merge(struct footballerType* arr, int l, int m, int r, char direction) {
@@ -248,8 +259,11 @@ void mergeSort(struct footballerType* arr, int n, char direction) {
     return;
   }
 
+  clock_t start = clock();
   splitAndMerge(arr, 0, n - 1, direction);
-  printf("Successfully merge sort.\n");
+  clock_t stop = clock();
+
+  printf("Successfully sort in: %.03fs\n", (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
 void printMainMenuOperationsList() {
