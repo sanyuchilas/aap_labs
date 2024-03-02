@@ -393,8 +393,8 @@ int main() {
   struct footballerType* arr = NULL;
   int *pn;
 
-  // startMainMenu(arr, pn);
-  runTests();
+  startMainMenu(arr, pn);
+  // runTests();
 
   return 0;
 }
