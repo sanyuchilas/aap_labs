@@ -389,6 +389,56 @@ void printBinaryFile(char *fileName) {
   fclose(f);
 }
 
+void findVeryOldWithALotOfGoals(char *fileName) {
+  FILE *f = fopen(fileName, "rb");
+
+  if (!f) {
+    printf("File with name %s could not be open for reading.\n", fileName);
+    return;
+  }
+
+  printf("\nFound old guy with a lot of goals.\n");
+  printTableHeader();
+
+  struct footballerType entry;
+  struct footballerType outEntry;
+
+  int fileLength = getFileLength(f);
+  int entriesCount = 0;
+  int maximumGoals = 0;
+  int maximumAge = 0;
+
+  for (int i = 0; i < fileLength; i++) {
+    fread(&entry, sizeof(struct footballerType), 1, f);
+    
+    if (entry.numberOfGoals > maximumGoals) {
+      maximumGoals = entry.numberOfGames;
+      entriesCount++;
+    }
+  }
+
+  fseek(f, 0, SEEK_SET);
+
+  for (int i = 0; i < fileLength; i++) {
+    fread(&entry, sizeof(struct footballerType), 1, f);
+    
+    if (entry.numberOfGoals == maximumGoals && entry.age > maximumAge) {
+      maximumAge = entry.age;
+      outEntry = entry;
+      entriesCount++;
+    }
+  }
+
+  if (entriesCount == 0) {
+    printf("No entries were found.\n");
+  }
+
+  printFootballer(outEntry, 0);
+
+  fclose(f);
+  printf("\n");
+}
+
 void printFindAllOperationsList() {
   printf("\n");
   printf("%30s %3s", "full name:", "1\n");
@@ -397,6 +447,7 @@ void printFindAllOperationsList() {
   printf("%30s %3s", "age:", "4\n");
   printf("%30s %3s", "number of goals:", "5\n");
   printf("%30s %3s", "number of games:", "6\n");
+  printf("%30s %3s", "very old with maximum goals:", "7\n");
   printf("\n\n");
 }
 
@@ -410,7 +461,7 @@ void startFindAllEntriesMenu() {
   fflush(stdin);
   scanf("%d", &operationCode);
 
-  if (operationCode <= 0 || operationCode > 6) {
+  if (operationCode <= 0 || operationCode > 7) {
     startFindAllEntriesMenu();
     return;
   }
@@ -455,6 +506,11 @@ void startFindAllEntriesMenu() {
       int numberOfGames;
       getFootballerNumberOfGamesByUser(&numberOfGames);
       findAllEntriesByNumberOfGames(FILE_NAME, numberOfGames);
+      break;
+    }
+
+    case 7: {
+      findVeryOldWithALotOfGoals(FILE_NAME);
       break;
     }
   }
