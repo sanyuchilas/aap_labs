@@ -64,9 +64,9 @@ char* generateString(int length, int countOfUsedSymbols) {
 
 struct footballerType generateFootballer() {
   struct footballerType out = {
-    .fullName=generateString(20, 26),
-    .clubName=generateString(20, 26),
-    .role=generateString(20, 26),
+    .fullName=generateString(1, 1),
+    .clubName=generateString(1, 1),
+    .role=generateString(1, 1),
     .age=(rand() % 100),
     .numberOfGames=(rand() % 100),
     .numberOfGoals=(rand() % 100),
@@ -82,7 +82,7 @@ struct footballerType* generateFootballersArray(int length) {
     arr[i] = generateFootballer();
   }
 
-  // printf("Successfully generated %d footballers array.\n", length);
+  printf("Successfully generated %d footballers array.\n", length);
   return arr;
 }
 
@@ -293,9 +293,10 @@ void startMainMenu(struct footballerType* arr, int *pn) {
   switch (operationCode) {
     case 1: {
       printf("Enter footballers count: ");
+
       fflush(stdin);
       scanf("%d", pn);
-
+    
       arr = generateFootballersArray(*pn);
 
       break;
@@ -391,9 +392,9 @@ int main() {
   srand(time(NULL)); // Init first random number.
 
   struct footballerType* arr = NULL;
-  int *pn;
+  int pn;
 
-  startMainMenu(arr, pn);
+  startMainMenu(arr, &pn);
   // runTests();
 
   return 0;
