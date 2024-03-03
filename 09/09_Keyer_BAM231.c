@@ -6,13 +6,15 @@
 #include <assert.h> // Assertion library.
 #include <string.h> // String functions library.
 
+// Function getting direction of sorting by user.
 void getSortDirectionByUser(int* direction) {
   printf("Enter sort direction (1 - increasing, -1 - decreasing): ");
 
-  fflush(stdin);
+  fflush(stdin); // Clear stdin flow.
   scanf("%d", direction);
 }
 
+// Function printing horizontal line.
 void printHr(int length) {
   for (int j = 0; j < length; j++) {
       printf("- ");
@@ -20,17 +22,20 @@ void printHr(int length) {
     printf("\n");
 }
 
+// Function printing table header.
 void printTableHeader() {
   printHr(65);
   printf("%4s|%30s|%30s|%30s|%10s|%10s|%10s|\n", "ID", "FULL NAME", "CLUB NAME", "ROLE", "AGE", "GAMES", "GOALS");
   printHr(65);
 }
 
+// Function printing footballer.
 void printFootballer(struct footballerType footballer, int id) {
   printf("%4d|%30s|%30s|%30s|%10d|%10d|%10d|\n", id, footballer.fullName, footballer.clubName, footballer.role, footballer.age, footballer.numberOfGames, footballer.numberOfGoals);
   printHr(65);
 }
 
+// Function printing footballers.
 void printFootballers(struct footballerType* footballers, int length) {
   if (footballers == NULL) {
     printf("Incorrect array.\n");
@@ -44,6 +49,7 @@ void printFootballers(struct footballerType* footballers, int length) {
   }
 }
 
+// Function generating string.
 char* generateString(int length, int countOfUsedSymbols) {
   assert(countOfUsedSymbols <= 26);
 
@@ -62,6 +68,7 @@ char* generateString(int length, int countOfUsedSymbols) {
   return out;
 }
 
+// Function generating footballer.
 struct footballerType generateFootballer() {
   struct footballerType out = {
     .fullName=generateString(1, 1),
@@ -75,6 +82,7 @@ struct footballerType generateFootballer() {
   return out;
 }
 
+// Function generating footballer array.
 struct footballerType* generateFootballersArray(int length) {
   struct footballerType* arr = (struct footballerType*)malloc(sizeof(struct footballerType) * length);
   
@@ -86,6 +94,7 @@ struct footballerType* generateFootballersArray(int length) {
   return arr;
 }
 
+// Function comparing footballers.
 int compareFootballers(struct footballerType footballer1, struct footballerType footballer2, int direction) {
   int cmpFullNames = strcmp(footballer1.fullName, footballer2.fullName);
 
@@ -117,6 +126,7 @@ int compareFootballers(struct footballerType footballer1, struct footballerType 
   }
 }
 
+// Bubble sotring function.
 void bubbleSort(struct footballerType* arr, int n, char direction) {
   if (arr == NULL) {
     printf("Incorrect array.\n");
@@ -141,6 +151,7 @@ void bubbleSort(struct footballerType* arr, int n, char direction) {
   printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
+// Function sorting by insertions.
 void insertSort(struct footballerType* arr, int n, char direction) {
   if (arr == NULL) {
     printf("Incorrect array.\n");
@@ -167,6 +178,7 @@ void insertSort(struct footballerType* arr, int n, char direction) {
   printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
+// Shaker sorting function.
 void shakerSort(struct footballerType* arr, int n, char direction) {
   if (arr == NULL) {
     printf("Incorrect array.\n");
@@ -202,6 +214,7 @@ void shakerSort(struct footballerType* arr, int n, char direction) {
   printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
+// Functio mergin two arrays.
 void merge(struct footballerType* arr, int l, int m, int r, char direction) {
   int i = l;
   int j = m + 1;
@@ -241,9 +254,10 @@ void merge(struct footballerType* arr, int l, int m, int r, char direction) {
     arr[l + k] = tmp[k];
   };
 
-  free(tmp);
+  free(tmp); // Free allocated memory.
 }
 
+// Function spliting and merging sorting array.
 void splitAndMerge(struct footballerType* arr, int l, int r, char direction) {
   if (l < r) {
     int m = (l + r) / 2;
@@ -253,6 +267,7 @@ void splitAndMerge(struct footballerType* arr, int l, int r, char direction) {
   }
 }
 
+// Merge sotring function.
 void mergeSort(struct footballerType* arr, int n, char direction) {
   if (arr == NULL) {
     printf("Incorrect array.\n");
@@ -266,6 +281,7 @@ void mergeSort(struct footballerType* arr, int n, char direction) {
   printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
 }
 
+// Function printing main operations codes list.
 void printMainMenuOperationsList() {
   printf("\n");
   printf("%30s %3s", "generate array:", "1\n");
@@ -278,6 +294,7 @@ void printMainMenuOperationsList() {
   printf("\n\n");
 }
 
+// Function starting main menu.
 void startMainMenu(struct footballerType* arr, int *pn) {
   printf("\n");
   printMainMenuOperationsList();
@@ -287,7 +304,7 @@ void startMainMenu(struct footballerType* arr, int *pn) {
 
   printf("Enter correct operation code: ");
 
-  fflush(stdin);
+  fflush(stdin); // Clear stdin flow.
   scanf("%d", &operationCode);
 
   switch (operationCode) {
@@ -340,6 +357,7 @@ void startMainMenu(struct footballerType* arr, int *pn) {
   startMainMenu(arr, pn);
 }
 
+// Function running tests.
 void runTests() {
   printf("Sort by insertions.\n\n");
 

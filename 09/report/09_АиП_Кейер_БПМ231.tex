@@ -98,7 +98,7 @@
 		Департамент прикладной математики
 		
 		\vspace{10ex}
-		\textbf{Отчёт \\ по лабораторной работе №7 \\ по курсу <<Алгоритмизация и программирование>> \\ Задание № 13}
+		\textbf{Отчёт \\ по лабораторной работе №8 \\ по курсу <<Алгоритмизация и программирование>> \\ Задание № 13}
 		\vspace{7ex}
 		
 	\end{center}
@@ -127,488 +127,486 @@
 	
 	%---------------------------------------------------------------------------------
 	
-	\section*{Задание (вариант № 13)}
+	\section{Задание (вариант № 13)}
+
 	
- 	Написать функцию обработки строки и программу, тестирующую данную функцию. В программе должен быть предусмотрен вывод исходный строки, которая при выделении слов не должна измениться.
- 	\vspace{5pt}
-	\newline
-	\textbf{Дана строка, содержащая от 1 до 30 слов, в каждом из которых от 1 до 10 латинских букв и/или цифр; между соседними словами-- запятая, за последним словом -- точка. Напечатать эту же последовательность слов, но удалив из нее повторные вхождения слов.}
+	\begin{enumerate}
+		\item Реализовать указанные в варианте алгоритмы сортировки для массива объектов в соответствии с вариантом. Структура объекта описана в варианте ЛР8. Определить функции сравнения объектов по следующему принципу: приоритет сравнения определяется порядком поля в структуре, т.е. если структурный тип Х содержит (в описании варианта) поля с именами a,b,c,d, то при сравнении двух объектов типа Х надо сравнить поля с именем a, в случае их равенства сравнить поля b и т.д.
+		\item Каждый алгоритм сортировки должен поддерживать сортировку в обоих направлениях: по неубыванию и по невозрастанию.
+		\item Выбор и запуск требуемого алгоритма и направления сортировки осуществляется через меню на этапе выполнения.
+		\item Провести сортировку каждым алгоритмом массивов следующих размеров: 100, 1000, 5000, 10000, 20000, 50000, 100000 Засечь (программно) время сортировки каждым алгоритмом. По полученным точкам построить графики зависимости времени сортировки от размерности массива для каждого из алгоритмов сортировки на одной оси координат. Полученные графики включить в отчет к работе.
+	\end{enumerate}
+	
+	\textbf{Реализовать сортировки:}
+	\begin{itemize}
+		\item B -- вставками
+		\item D -- шейкер
+		\item E -- слиянием
+	\end{itemize}
 	
 	\newpage
 	
-	\section*{Решение 1 (аккуратно используем strtok)}
+	\section{Структура заголовочного файла}
 	
 	\begin{lstlisting}[language=C]
-	#include <stdio.h> // Input/outpu library.
-	#include <string.h> // String libarary for special function: strtok, strcat etc.
+		#define fieldLength 64
+		#define fieldSize fieldLength * sizeof(char)
+		#define entryLength 6
+		
+		struct footballerType {
+			char fullName[fieldLength];
+			char clubName[fieldLength];
+			char role[fieldLength];
+			int age;
+			int numberOfGames;
+			int numberOfGoals;
+		};
+	\end{lstlisting}
 	
-	// Useful directives for words.
-	#define maxWordsCount 30
-	#define minWordsCount 1
-	#define maxWordLength 10
-	#define minWordLength 1
+	\section{Решение}
 	
-	// Useful directives for string.
-	#define maxSLength maxWordsCount * maxWordLength
-	#define minSLength minWordsCount * minWordLength
-	
-	// Useful directives for string tokens.
-	#define separator ","
-	#define endToken "."
-	
-	// Function validating a string.
-	int isSValid(char s[maxSLength]) {
-		size_t sLength = strlen(s);
+	\begin{lstlisting}[language=C]
+		#include "football.h" // Footballer info.
 		
-		char* endTokenP = strstr(s, endToken);
+		#include <stdio.h> // Input/output library.
+		#include <stdlib.h> // Memory allocation.
+		#include <time.h> // Time library.
+		#include <assert.h> // Assertion library.
+		#include <string.h> // String functions library.
 		
-		// Checking the last symbol for a dot.
-		if (endTokenP != s + sLength - 1) {
-			printf("The string must have no more than 300 symbols, contain only one dot and end with this dot.\n");
-			return 0;
-		}
-		
-		// Checking string length.
-		if (sLength > maxSLength || sLength < minSLength) {
-			printf("Incorrect string length.\n");
-			return 0;
-		}
-		
-		// Checking string for incorrect symbols.
-		for (int i = 0; s[i] != '\0'; i++) {
-			if (!(
-			s[i] == 44
-			|| s[i] == 10
-			|| s[i] == 46 
-			|| (s[i] >= 65 && s[i] <= 90) 
-			|| (s[i] >= 97 && s[i] <= 122) 
-			|| (s[i] >= 48 && s[i] <= 57)
-			)) {
-				printf("The string contains incorrect symbols.\n");
-				return 0;
-			}
-		}
-		
-		return 1;
-	}
-	
-	// Function reading a string from stdin.
-	int sReading(char sExternal[maxSLength]) {
-		printf("Please, enter correct string:\n");
-		
-		char s[maxSLength];
-		fseek(stdin, 0, SEEK_END); // Jumped over previous stdin. We also can clear stdin here: fflush(stdin);
-		fgets(s, maxSLength, stdin);
-		
-		s[strlen(s) - 1] = '\0'; // Remove \n symbol.
-		strcpy(sExternal, s);
-		
-		return 0;
-	}
-	
-	// Function printing words array.
-	int printWordsArr(char wordsArr[maxWordsCount][maxWordLength], int wordsCount) {
-		for (int i = 0; i < wordsCount; i++) {
-			for (int j = 0; j < maxWordLength; j++) {
-				if (wordsArr[i][j] == '\0') {
-					break;
-				}
-				
-				printf("%c", wordsArr[i][j]);
-			}
+		// Function getting direction of sorting by user.
+		void getSortDirectionByUser(int* direction) {
+			printf("Enter sort direction (1 - increasing, -1 - decreasing): ");
 			
-			// Placing tokens correctly.
-			if (i < wordsCount - 1) {
-				printf(",");
-			} else {
-				printf(".\n");
+			fflush(stdin); // Clear stdin flow.
+			scanf("%d", direction);
+		}
+		
+		// Function printing horizontal line.
+		void printHr(int length) {
+			for (int j = 0; j < length; j++) {
+				printf("- ");
 			}
+			printf("\n");
 		}
 		
-		return 0;
-	}
-	
-	// Function changing matrix row.
-	int changeMatrixRow(char matrix[maxWordsCount][maxWordLength], int i, char row[maxWordLength]) {
-		for (int j = 0; j < maxWordLength; j++) {
-			matrix[i][j] = row[j];
+		// Function printing table header.
+		void printTableHeader() {
+			printHr(65);
+			printf("%4s|%30s|%30s|%30s|%10s|%10s|%10s|\n", "ID", "FULL NAME", "CLUB NAME", "ROLE", "AGE", "GAMES", "GOALS");
+			printHr(65);
 		}
 		
-		return 0;
-	}
-	
-	// Function checking for the presence of a row in array.
-	int isMatrixContainRow(char matrix[maxWordsCount][maxWordLength], int rowsCount, char row[maxWordLength]) {
-		for (int i = 0; i < rowsCount; i++) {
-			for (int j = 0; j < maxWordLength; j++) {
-				if (matrix[i][j] != row[j]) {
-					break;
-				}
-				
-				// Checking for the end token.
-				if (matrix[i][j] == '\0' || j == maxWordLength - 1) {
-					return 1;
-				}
-			}
+		// Function printing footballer.
+		void printFootballer(struct footballerType footballer, int id) {
+			printf("%4d|%30s|%30s|%30s|%10d|%10d|%10d|\n", id, footballer.fullName, footballer.clubName, footballer.role, footballer.age, footballer.numberOfGames, footballer.numberOfGoals);
+			printHr(65);
 		}
 		
-		return 0;
-	}
-	
-	// Function presenting solution.
-	void solution(char s[maxSLength]) {
-		printf("You entered string: %s\n", s);
-		
-		// String validation.
-		if (!isSValid(s)) {
-			return;
-		}
-		
-		s[strlen(s) - 1] = '\0'; // Remove . symbol.
-		
-		// Useful variables initialization.
-		char* word;
-		int uniqueWordsCount = 0;
-		int wordsCount = 0;
-		char wordsArr[maxWordsCount][maxWordLength];
-		
-		word = strtok(s, separator);
-		
-		// Checking for correctly first word.
-		if (word == NULL) {
-			printf("Incorrect word length or words count.\n");
-			return;
-		}
-		
-		// Splitting string into words.
-		while (word != NULL) {
-			size_t wordLength = strlen(word);
-			
-			// Checking for correctly rest words.
-			if (
-			wordLength < minWordLength 
-			|| wordLength > maxWordLength 
-			|| wordsCount > maxWordsCount
-			) {
-				printf("Incorrect word length or words count.\n");
+		// Function printing footballers.
+		void printFootballers(struct footballerType* footballers, int length) {
+			if (footballers == NULL) {
+				printf("Incorrect array.\n");
 				return;
 			}
 			
-			// Adding word into special array.
-			if (!isMatrixContainRow(wordsArr, uniqueWordsCount, word)) {
-				changeMatrixRow(wordsArr, uniqueWordsCount++, word);
-			} 
+			printTableHeader();
 			
-			wordsCount++;
-			word = strtok(NULL, separator);
+			for (int i = 0; i < length; i++) {
+				printFootballer(footballers[i], i);
+			}
 		}
 		
-		printf("New string: ");
+		// Function generating string.
+		char* generateString(int length, int countOfUsedSymbols) {
+			assert(countOfUsedSymbols <= 26);
+			
+			char* out = (char*)malloc(sizeof(char) * (length + 1));
+			char alphabet[26] = {
+				'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+				'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+			};
+			
+			for (int i = 0; i < length; i++) {
+				out[i] = alphabet[rand() % countOfUsedSymbols];
+			}
+			
+			out[length] = '\0';
+			
+			return out;
+		}
 		
-		// Printing special word array.
-		printWordsArr(wordsArr, uniqueWordsCount);
-	}
-	
-	// Main function.
-	int main() {
+		// Function generating footballer.
+		struct footballerType generateFootballer() {
+			struct footballerType out = {
+				.fullName=generateString(1, 1),
+				.clubName=generateString(1, 1),
+				.role=generateString(1, 1),
+				.age=(rand() % 100),
+				.numberOfGames=(rand() % 100),
+				.numberOfGoals=(rand() % 100),
+			};
+			
+			return out;
+		}
 		
-		// Test 1.
-		printf("Test 1\n");
-		char s1[] = "a,a.";
-		solution(s1);
-		printf("\n===\n\n");
+		// Function generating footballer array.
+		struct footballerType* generateFootballersArray(int length) {
+			struct footballerType* arr = (struct footballerType*)malloc(sizeof(struct footballerType) * length);
+			
+			for (int i = 0; i < length; i++) {
+				arr[i] = generateFootballer();
+			}
+			
+			printf("Successfully generated %d footballers array.\n", length);
+			return arr;
+		}
 		
-		// Test 2.
-		printf("Test 2\n");
-		char s2[] = "a,a";
-		solution(s2);
-		printf("\n===\n\n");
+		// Function comparing footballers.
+		int compareFootballers(struct footballerType footballer1, struct footballerType footballer2, int direction) {
+			int cmpFullNames = strcmp(footballer1.fullName, footballer2.fullName);
+			
+			if (cmpFullNames != 0) {
+				return direction * cmpFullNames;    
+			}
+			
+			int cmpClubNames = strcmp(footballer1.clubName, footballer2.clubName);
+			
+			if (cmpClubNames != 0) {
+				return direction * cmpClubNames;    
+			}
+			
+			int cmpRole = strcmp(footballer1.role, footballer2.role);
+			
+			if (cmpRole != 0) {
+				return direction * cmpRole;    
+			}
+			
+			if (footballer1.age != footballer2.age) {
+				return direction * (footballer1.age - footballer2.age);
+			}
+			
+			if (footballer1.numberOfGames != footballer2.numberOfGames) {
+				return direction * (footballer1.numberOfGames - footballer2.numberOfGames);
+			}
+			if (footballer1.numberOfGoals != footballer2.numberOfGoals) {
+				return direction * (footballer1.numberOfGoals - footballer2.numberOfGoals);
+			}
+		}
 		
-		// Test 3.
-		printf("Test 3\n");
-		char s3[] = "a.a.";
-		solution(s3);
-		printf("\n===\n\n");
+		// Bubble sotring function.
+		void bubbleSort(struct footballerType* arr, int n, char direction) {
+			if (arr == NULL) {
+				printf("Incorrect array.\n");
+				return;
+			}
+			
+			struct footballerType tmp;
+			
+			clock_t start = clock();
+			
+			for (int i = n - 1; i >= 0; i--) {
+				for (int j = 0; j < i; j++) {
+					if (compareFootballers(arr[j], arr[j + 1], direction) > 0) {
+						tmp = arr[j + 1];
+						arr[j + 1] = arr[j];
+						arr[j] = tmp;
+					}
+				}
+			}
+			clock_t stop = clock();
+			
+			printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
+		}
 		
-		// Test 4.
-		printf("Test 4\n");
-		char s4[] = ".";
-		solution(s4);
-		printf("\n===\n\n");
+		// Function sorting by insertions.
+		void insertSort(struct footballerType* arr, int n, char direction) {
+			if (arr == NULL) {
+				printf("Incorrect array.\n");
+				return;
+			}
+			
+			int j;
+			struct footballerType tmp;
+			
+			clock_t start = clock();
+			
+			for (int i = 1; i < n; i++) {
+				tmp = arr[i];
+				
+				for (j = i - 1; j >= 0 && compareFootballers(arr[j], tmp, direction) > 0; j--) {
+					arr[j + 1] = arr[j];
+				}
+				
+				arr[j + 1] = tmp;
+			}
+			
+			clock_t stop = clock();
+			
+			printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
+		}
 		
-		// Test 5.
-		printf("Test 5\n");
-		char s5[] = "asdasdasdas.";
-		solution(s5);
-		printf("\n===\n\n");
+		// Shaker sorting function.
+		void shakerSort(struct footballerType* arr, int n, char direction) {
+			if (arr == NULL) {
+				printf("Incorrect array.\n");
+				return;
+			}
+			
+			struct footballerType tmp;
+			int  l = 1, r = n;
+			int j;
+			
+			clock_t start = clock();
+			
+			do {
+				for(j = --r; j >= l; j--) {
+					if (compareFootballers(arr[j - 1], arr[j], direction) > 0) {
+						tmp = arr[j - 1];
+						arr[j - 1] = arr[j];
+						arr[j] = tmp;
+					}
+				}
+				
+				for (j = ++l; j <= r; j++) {
+					if (compareFootballers(arr[j - 1], arr[j], direction) > 0) {
+						tmp = arr[j - 1];
+						arr[j - 1] = arr[j];
+						arr[j] = tmp;
+					}
+				}
+			} while (l < r);
+			
+			clock_t stop = clock();
+			
+			printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
+		}
 		
-		// Test 6.
-		printf("Test 6\n");
-		char s6[] = "a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a.";
-		solution(s6);
-		printf("\n===\n\n");
+		// Functio mergin two arrays.
+		void merge(struct footballerType* arr, int l, int m, int r, char direction) {
+			int i = l;
+			int j = m + 1;
+			int k = 0;
+			
+			struct footballerType* tmp = (struct footballerType*)malloc(sizeof(struct footballerType) * (r - l + 1));
+			
+			while (i <= m && j <= r) {
+				if (compareFootballers(arr[i], arr[j], direction) >= 0) {
+					tmp[k] = arr[j];
+					j++;
+				} else {
+					tmp[k] = arr[i];
+					i++;
+				}
+				
+				k++;
+			}
+			
+			if (i > m) {
+				while (j <= r) {
+					tmp[k] = arr[j];
+					
+					j++;
+					k++;
+				}
+			} else {
+				while (i <= m) {
+					tmp[k] = arr[i];
+					
+					i++;
+					k++;
+				}
+			}
+			
+			for (k = 0; k <= r - l; k++) {
+				arr[l + k] = tmp[k];
+			};
+			
+			free(tmp); // Free allocated memory.
+		}
 		
-		// Test 7.
-		printf("Test 7\n");
-		char s7[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.";
-		solution(s7);
-		printf("\n===\n\n");
+		// Function spliting and merging sorting array.
+		void splitAndMerge(struct footballerType* arr, int l, int r, char direction) {
+			if (l < r) {
+				int m = (l + r) / 2;
+				splitAndMerge(arr, l, m, direction);
+				splitAndMerge(arr, m + 1, r, direction);
+				merge(arr, l, m, r, direction);
+			}
+		}
 		
-		// User test.
-		char s8[] = "";
-		sReading(s8);
-		solution(s8);
+		// Merge sotring function.
+		void mergeSort(struct footballerType* arr, int n, char direction) {
+			if (arr == NULL) {
+				printf("Incorrect array.\n");
+				return;
+			}
+			
+			clock_t start = clock();
+			splitAndMerge(arr, 0, n - 1, direction);
+			clock_t stop = clock();
+			
+			printf("%5s%6d: %.03fs\n", "n=", n, (double)(stop - start) / CLOCKS_PER_SEC);
+		}
 		
-		return 0;
-	}
+		// Function printing main operations codes list.
+		void printMainMenuOperationsList() {
+			printf("\n");
+			printf("%30s %3s", "generate array:", "1\n");
+			printf("%30s %3s", "sort by insertions:", "2\n");
+			printf("%30s %3s", "bubble sort:", "3\n");
+			printf("%30s %3s", "shaker sort:", "4\n");
+			printf("%30s %3s", "merge sort:", "5\n");
+			printf("%30s %3s", "print array:", "6\n");
+			printf("%30s %3s", "exit program:", "7\n");
+			printf("\n\n");
+		}
+		
+		// Function starting main menu.
+		void startMainMenu(struct footballerType* arr, int *pn) {
+			printf("\n");
+			printMainMenuOperationsList();
+			
+			int operationCode = 0;
+			int direction = 1;
+			
+			printf("Enter correct operation code: ");
+			
+			fflush(stdin); // Clear stdin flow.
+			scanf("%d", &operationCode);
+			
+			switch (operationCode) {
+				case 1: {
+					printf("Enter footballers count: ");
+					
+					fflush(stdin);
+					scanf("%d", pn);
+					
+					arr = generateFootballersArray(*pn);
+					
+					break;
+				}
+				
+				case 2: {
+					getSortDirectionByUser(&direction);
+					insertSort(arr, *pn, direction);
+					break;
+				}
+				
+				case 3: {
+					getSortDirectionByUser(&direction);
+					bubbleSort(arr, *pn, direction);
+					break;
+				}
+				
+				case 4: {
+					getSortDirectionByUser(&direction);
+					shakerSort(arr, *pn, direction);
+					break;
+				}
+				
+				case 5: {
+					getSortDirectionByUser(&direction);
+					mergeSort(arr, *pn, direction);
+					break;
+				}
+				
+				case 6: {
+					printFootballers(arr, *pn);
+					break;
+				}
+				
+				case 7: {
+					return;
+				}
+			}
+			
+			printf("\n");
+			startMainMenu(arr, pn);
+		}
+		
+		// Function running tests.
+		void runTests() {
+			printf("Sort by insertions.\n\n");
+			
+			insertSort(generateFootballersArray(100), 100, 1);
+			insertSort(generateFootballersArray(1000), 1000, 1);
+			insertSort(generateFootballersArray(5000), 5000, 1);
+			insertSort(generateFootballersArray(10000), 10000, 1);
+			insertSort(generateFootballersArray(20000), 20000, 1);
+			insertSort(generateFootballersArray(50000), 50000, 1);
+			insertSort(generateFootballersArray(100000), 100000, 1);
+			
+			printf("\n----------\n\n");
+			
+			printf("Bubble sort.\n\n");
+			
+			bubbleSort(generateFootballersArray(100), 100, 1);
+			bubbleSort(generateFootballersArray(1000), 1000, 1);
+			bubbleSort(generateFootballersArray(5000), 5000, 1);
+			bubbleSort(generateFootballersArray(10000), 10000, 1);
+			bubbleSort(generateFootballersArray(20000), 20000, 1);
+			bubbleSort(generateFootballersArray(50000), 50000, 1);
+			bubbleSort(generateFootballersArray(100000), 100000, 1);
+			
+			printf("\n----------\n\n");
+			
+			printf("Shaker sort.\n\n");
+			
+			shakerSort(generateFootballersArray(100), 100, 1);
+			shakerSort(generateFootballersArray(1000), 1000, 1);
+			shakerSort(generateFootballersArray(5000), 5000, 1);
+			shakerSort(generateFootballersArray(10000), 10000, 1);
+			shakerSort(generateFootballersArray(20000), 20000, 1);
+			shakerSort(generateFootballersArray(50000), 50000, 1);
+			shakerSort(generateFootballersArray(100000), 100000, 1);
+			
+			printf("\n----------\n\n");
+			
+			printf("Merge sort.\n\n");
+			
+			mergeSort(generateFootballersArray(100), 100, 1);
+			mergeSort(generateFootballersArray(1000), 1000, 1);
+			mergeSort(generateFootballersArray(5000), 5000, 1);
+			mergeSort(generateFootballersArray(10000), 10000, 1);
+			mergeSort(generateFootballersArray(20000), 20000, 1);
+			mergeSort(generateFootballersArray(50000), 50000, 1);
+			mergeSort(generateFootballersArray(100000), 100000, 1);
+		}
+		
+		int main() {
+			srand(time(NULL)); // Init first random number.
+			
+			struct footballerType* arr = NULL;
+			int pn;
+			
+			startMainMenu(arr, &pn);
+			// runTests();
+			
+			return 0;
+		}
 	\end{lstlisting}
 	
 	\newpage
 	
-	\section*{Решение 2 (аккуратно не используем strtok)}
+	\section{Тесты}
 	
-	\begin{lstlisting}[language=C]
-	#include <stdio.h> // Input/outpu library.
-	#include <string.h> // String libarary for special function: strtok, strcat etc.
+	\subsection{Тест 1 (графики и оценка эффективности)}
+	\includegraphics[width=0.25\linewidth]{tests.png}
+	\includegraphics[width=0.75\linewidth]{graphics.png} \newline
+	По времени эффективнее всех оказывается сортировка слиянием. Дальше по порядку идут: сортировка вставками, сортировка шейкером, пузырьковая сортировка.
+	Естественно, по затратам памяти самой неэффективной оказывается сортировка слиянием, но затраты по памяти полностью компенсируются временными.
 	
-	// Useful directives for words.
-	#define maxWordsCount 30
-	#define minWordsCount 1
-	#define maxWordLength 10
-	#define minWordLength 1
+	\subsection{Тест 2}
+	\includegraphics[width=1\linewidth]{test_2.png} \newline
+	Успешная генерация массива футболистов соответствующего размера.
 	
-	// Useful directives for string.
-	#define maxSLength maxWordsCount * maxWordLength
-	#define minSLength minWordsCount * minWordLength
+	\subsection{Тест 3}
+	\includegraphics[width=1\linewidth]{test_3.png} \newline
+	Успешный вывод массива футболистов соответствующего размера.
 	
-	// Useful directives for string tokens.
-	#define separator ","
-	#define endToken "."
-	
-	// Function validating a string.
-	int isSValid(char s[maxSLength]) {
-		size_t sLength = strlen(s);
-		
-		char* endTokenP = strstr(s, endToken);
-		
-		// Checking the last symbol for a dot.
-		if (endTokenP != s + sLength - 1) {
-			printf("The string must have no more than 300 symbols, contain only one dot and end with this dot.\n");
-			return 0;
-		}
-		
-		// Checking string length.
-		if (sLength > maxSLength || sLength < minSLength) {
-			printf("Incorrect string length.\n");
-			return 0;
-		}
-		
-		// Checking string for incorrect symbols.
-		for (int i = 0; s[i] != '\0'; i++) {
-			if (!(
-			s[i] == 44
-			|| s[i] == 10
-			|| s[i] == 46 
-			|| (s[i] >= 65 && s[i] <= 90) 
-			|| (s[i] >= 97 && s[i] <= 122) 
-			|| (s[i] >= 48 && s[i] <= 57)
-			)) {
-				printf("The string contains incorrect symbols.\n");
-				return 0;
-			}
-		}
-		
-		return 1;
-	}
-	
-	// Function reading a string from stdin.
-	int sReading(char sExternal[maxSLength]) {
-		printf("Please, enter correct string:\n");
-		
-		char s[maxSLength];
-		fseek(stdin, 0, SEEK_END); // Jumped over previous stdin. We also can clear stdin here: fflush(stdin);
-		fgets(s, maxSLength, stdin);
-		
-		s[strlen(s) - 1] = '\0'; // Remove \n symbol.
-		strcpy(sExternal, s);
-		
-		return 0;
-	}
-	
-	// Function printing words array.
-	int printWordsArr(char wordsArr[maxWordsCount][maxWordLength], int wordsCount) {
-		for (int i = 0; i < wordsCount; i++) {
-			for (int j = 0; j < maxWordLength; j++) {
-				if (wordsArr[i][j] == '\0') {
-					break;
-				}
-				
-				printf("%c", wordsArr[i][j]);
-			}
-			
-			// Placing tokens correctly.
-			if (i < wordsCount - 1) {
-				printf(",");
-			} else {
-				printf(".\n");
-			}
-		}
-		
-		return 0;
-	}
-	
-	// Function changing matrix row.
-	int changeMatrixRow(char matrix[maxWordsCount][maxWordLength], int i, char row[maxWordLength]) {
-		for (int j = 0; j < maxWordLength; j++) {
-			matrix[i][j] = row[j];
-		}
-		
-		return 0;
-	}
-	
-	// Function checking for the presence of a row in array.
-	int isMatrixContainRow(char matrix[maxWordsCount][maxWordLength], int rowsCount, char row[maxWordLength]) {
-		for (int i = 0; i < rowsCount; i++) {
-			for (int j = 0; j < maxWordLength; j++) {
-				if (matrix[i][j] != row[j]) {
-					break;
-				}
-				
-				// Checking for the end token.
-				if (matrix[i][j] == '\0' || j == maxWordLength - 1) {
-					return 1;
-				}
-			}
-		}
-		
-		return 0;
-	}
-	
-	// Function presenting solution.
-	void solution(char s[maxSLength]) {
-		printf("You entered string: %s\n", s);
-		
-		// String validation.
-		if (!isSValid(s)) {
-			return;
-		}
-		
-		s[strlen(s) - 1] = '\0'; // Remove . symbol.
-		
-		// Useful variables initialization.
-		char word[maxWordLength] = "";
-		int uniqueWordsCount = 0;
-		int wordsCount = 0;
-		char wordsArr[maxWordsCount][maxWordLength];
-		char symbol[2] = {'\0', '\0'};
-		
-		// Checking for correctly first word.
-		if (word == NULL) {
-			printf("Incorrect word length or words count.\n");
-			return;
-		}
-		
-		// Splitting string into words.
-		for (int i = 0; i < maxSLength; i++) {
-			symbol[0] = s[i];
-			
-			if (symbol[0] == '\0') {
-				break;
-			}
-			
-			// Adding a symbol.
-			if (symbol[0] != ',') {
-				strcat(word, symbol);
-			}
-			
-			size_t wordLength = strlen(word);
-			
-			// Checking for correctly rest words.
-			if (
-			wordLength < minWordLength 
-			|| wordLength > maxWordLength 
-			|| wordsCount > maxWordsCount
-			) {
-				printf("Incorrect word length or words count.\n");
-				return;
-			}
-			
-			// Adding word into special array.
-			if (symbol[0] == ',') {
-				if (!isMatrixContainRow(wordsArr, uniqueWordsCount, word)) {
-					changeMatrixRow(wordsArr, uniqueWordsCount++, word);
-				}
-				
-				// Word reset.
-				word[0] = '\0';
-			} 
-			
-			wordsCount++;
-		}
-		
-		// Printing special word array.
-		printf("New string: ");
-		printWordsArr(wordsArr, uniqueWordsCount);
-	}
-	
-	// Main function.
-	int main() {
-		
-		// Test 1.
-		printf("Test 1\n");
-		char s1[] = "a,a.";
-		solution(s1);
-		printf("\n===\n\n");
-		
-		// Test 2.
-		printf("Test 2\n");
-		char s2[] = "a,a";
-		solution(s2);
-		printf("\n===\n\n");
-		
-		// Test 3.
-		printf("Test 3\n");
-		char s3[] = "a.a.";
-		solution(s3);
-		printf("\n===\n\n");
-		
-		// Test 4.
-		printf("Test 4\n");
-		char s4[] = ".";
-		solution(s4);
-		printf("\n===\n\n");
-		
-		// Test 5.
-		printf("Test 5\n");
-		char s5[] = "asdasdasdas.";
-		solution(s5);
-		printf("\n===\n\n");
-		
-		// Test 6.
-		printf("Test 6\n");
-		char s6[] = "a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a.";
-		solution(s6);
-		printf("\n===\n\n");
-		
-		// Test 7.
-		printf("Test 7\n");
-		char s7[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.";
-		solution(s7);
-		printf("\n===\n\n");
-		
-		// User test.
-		char s8[] = "";
-		sReading(s8);
-		solution(s8);
-		
-		return 0;
-	}
-	\end{lstlisting}
-	
-	\newpage
-	
-	\section*{Тесты}
-	
-	\includegraphics[width=400pt]{tests.png}
+	\subsection{Тест 4}
+	\includegraphics[width=1\linewidth]{test_4.png} \newline
+	Успешная сортировка массива футболистов в соответствующем направлении.
 	
 \end{document}
