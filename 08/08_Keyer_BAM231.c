@@ -1,13 +1,16 @@
-#include "football.h"
+#pragma once
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <io.h>
+#include "football.h" // Headers file.
 
-#define FILE_NAME "footballer.bin"
+#include <stdio.h> // Input/output library.
+#include <string.h> // String library.
+#include <stdlib.h> // Mmory allocation library.
+#include <io.h> // File managing library.
+
+#define FILE_NAME "footballer.bin" 
 #define INPUT_TYPE 'a'
 
+// Function printing horizontal line.
 void printHr(int length) {
   for (int j = 0; j < length; j++) {
       printf("- ");
@@ -15,17 +18,20 @@ void printHr(int length) {
     printf("\n");
 }
 
+// Function printing table header.
 void printTableHeader() {
   printHr(65);
   printf("%2s|%30s|%30s|%30s|%10s|%10s|%10s|\n", "ID", "FULL NAME", "CLUB NAME", "ROLE", "AGE", "GAMES", "GOALS");
   printHr(65);
 }
 
+// Function printing footballer entry.
 void printFootballer(struct footballerType entry, int id) {
   printf("%2d|%30s|%30s|%30s|%10d|%10d|%10d|\n", id, entry.fullName, entry.clubName, entry.role, entry.age, entry.numberOfGames, entry.numberOfGoals);
   printHr(65);
 }
 
+// Function getting footballer id by user.
 void getEntryIdByUser(int *entryId) {
   printf("Enter footballer id: ");
 
@@ -33,6 +39,7 @@ void getEntryIdByUser(int *entryId) {
   scanf("%d", entryId);
 }
 
+// Function getting footballer full name by user.
 void getFootballerFullNameByUser(char fullName[fieldLength]) {
   printf("Enter full name: ");
 
@@ -41,6 +48,7 @@ void getFootballerFullNameByUser(char fullName[fieldLength]) {
   fullName[strcspn(fullName, "\n")] = 0;
 }
 
+// Function getting footballer club name by user.
 void getFootballerClubNameByUser(char clubName[fieldLength]) {
   printf("Enter club name: ");
 
@@ -49,6 +57,7 @@ void getFootballerClubNameByUser(char clubName[fieldLength]) {
   clubName[strcspn(clubName, "\n")] = 0;
 }
 
+// Function getting footballer role by user.
 void getFootballerRoleByUser(char role[fieldLength]) {
   printf("Enter role: ");
 
@@ -57,6 +66,7 @@ void getFootballerRoleByUser(char role[fieldLength]) {
   role[strcspn(role, "\n")] = 0;
 }
 
+// Function getting footballer age by user.
 void getFootballerAgeByUser(int *age) {
   printf("Enter age: ");
   
@@ -64,6 +74,7 @@ void getFootballerAgeByUser(int *age) {
   scanf("%d", age);
 }
 
+// Function getting footballer games by user.
 void getFootballerNumberOfGamesByUser(int *numberOfGames) {
   printf("Enter number of games: ");
 
@@ -71,6 +82,7 @@ void getFootballerNumberOfGamesByUser(int *numberOfGames) {
   scanf("%d", numberOfGames);
 }
 
+// Function getting footballer goals by user.
 void getFootballerNumberOfGoalsByUser(int *numberOfGoals) {
   printf("Enter count of goals: ");
 
@@ -78,6 +90,7 @@ void getFootballerNumberOfGoalsByUser(int *numberOfGoals) {
   scanf("%d", numberOfGoals);
 }
 
+// Function getting footballer by user.
 void getFootballerByUser(struct footballerType *footballer) {
   getFootballerFullNameByUser(footballer->fullName);
   getFootballerClubNameByUser(footballer->clubName);
@@ -87,6 +100,7 @@ void getFootballerByUser(struct footballerType *footballer) {
   getFootballerNumberOfGoalsByUser(&(footballer->numberOfGoals));
 }
 
+// Function getting file length.
 int getFileLength(FILE *f) {
   fseek(f, 0, SEEK_END);
   int fileLength = ftell(f) / sizeof(struct footballerType);
@@ -95,6 +109,7 @@ int getFileLength(FILE *f) {
   return fileLength;
 }
 
+// Function creating binary file.
 void createBinaryFile(char *fileName, struct footballerType entry) {
   FILE *f = fopen(fileName, "wb");
 
@@ -107,6 +122,7 @@ void createBinaryFile(char *fileName, struct footballerType entry) {
   fclose(f);
 }
 
+// Function appendind entry in binary file.
 void appendEntry(char *fileName, struct footballerType entry) {
   FILE *f = fopen(fileName, "ab");
 
@@ -119,6 +135,7 @@ void appendEntry(char *fileName, struct footballerType entry) {
   fclose(f);
 }
 
+// Function deleting entry by id from binary file.
 void deleteEntryById(char *fileName, int entryId) {
   FILE *f = fopen(fileName, "r+b");
 
@@ -137,9 +154,10 @@ void deleteEntryById(char *fileName, int entryId) {
     return;
   }
   
-  fseek(f, entryId * sizeof(struct footballerType), SEEK_SET);
-  fread(&deletedEntry, sizeof(struct footballerType), 1, f);
+  fseek(f, entryId * sizeof(struct footballerType), SEEK_SET); // Move pointer on correct position.
+  fread(&deletedEntry, sizeof(struct footballerType), 1, f); // Saving deleted entry.
 
+  // Making a shift.
   for (int i = entryId + 1; i < fileLength; i++) {
     fread(&tmpEntry, sizeof(struct footballerType), 1, f);
     fseek(f, (i - 1) * sizeof(struct footballerType), SEEK_SET);
@@ -147,11 +165,12 @@ void deleteEntryById(char *fileName, int entryId) {
     fseek(f, (i + 1) * sizeof(struct footballerType), SEEK_SET);
   }
 
-  _chsize(_fileno(f), (fileLength - 1) * sizeof(struct footballerType));
+  _chsize(_fileno(f), (fileLength - 1) * sizeof(struct footballerType)); // Clip file.
   fclose(f);
   printf("Successfully deleted '%s' from binary file.\n", deletedEntry.fullName);
 }
 
+// Find all entries by full name function.
 void findAllEntriesByFullName(char *fileName, char fieldValue[fieldLength]) {
   FILE *f = fopen(fileName, "rb");
 
@@ -184,6 +203,7 @@ void findAllEntriesByFullName(char *fileName, char fieldValue[fieldLength]) {
   fclose(f);
 }
 
+// Find all entries by club name function.
 void findAllEntriesByClubName(char *fileName, char fieldValue[fieldLength]) {
   FILE *f = fopen(fileName, "rb");
 
@@ -216,6 +236,7 @@ void findAllEntriesByClubName(char *fileName, char fieldValue[fieldLength]) {
   fclose(f);
 }
 
+// Find all entries by role function.
 void findAllEntriesByRole(char *fileName, char fieldValue[fieldLength]) {
   FILE *f = fopen(fileName, "rb");
 
@@ -248,6 +269,7 @@ void findAllEntriesByRole(char *fileName, char fieldValue[fieldLength]) {
   fclose(f);
 }
 
+// Find all entries by age function.
 void findAllEntriesByAge(char *fileName, int fieldValue) {
   FILE *f = fopen(fileName, "rb");
 
@@ -280,6 +302,7 @@ void findAllEntriesByAge(char *fileName, int fieldValue) {
   fclose(f);
 }
 
+// Find all entries by games function.
 void findAllEntriesByNumberOfGames(char *fileName, int fieldValue) {
   FILE *f = fopen(fileName, "rb");
 
@@ -312,6 +335,7 @@ void findAllEntriesByNumberOfGames(char *fileName, int fieldValue) {
   fclose(f);
 }
 
+// Find all entries by goals function.
 void findAllEntriesByNumberOfGoals(char *fileName, int fieldValue) {
   FILE *f = fopen(fileName, "rb");
 
@@ -344,6 +368,7 @@ void findAllEntriesByNumberOfGoals(char *fileName, int fieldValue) {
   printf("\n");
 }
 
+// Function updating entry by id.
 void updateEntryById(char *fileName, int entryId, struct footballerType newEntry) {
   FILE *f = fopen(fileName, "r+b");
 
@@ -357,6 +382,7 @@ void updateEntryById(char *fileName, int entryId, struct footballerType newEntry
     return;
   }
 
+  // Move pointer on correct position.
   fseek(f, entryId * sizeof(struct footballerType), SEEK_SET);
   fwrite(&newEntry, sizeof(struct footballerType), 1, f);
 
@@ -364,6 +390,7 @@ void updateEntryById(char *fileName, int entryId, struct footballerType newEntry
   printf("\nSuccessfully updated entry '%d'.\n", entryId);
 }
 
+// Function printing binary file.
 void printBinaryFile(char *fileName) {
   FILE *f = fopen(fileName, "rb");
 
@@ -389,6 +416,7 @@ void printBinaryFile(char *fileName) {
   fclose(f);
 }
 
+// Function finding very old footballer with a lot of goals.
 void findVeryOldWithALotOfGoals(char *fileName) {
   FILE *f = fopen(fileName, "rb");
 
@@ -408,6 +436,7 @@ void findVeryOldWithALotOfGoals(char *fileName) {
   int maximumGoals = 0;
   int maximumAge = 0;
 
+  // Finding maximum goals number.
   for (int i = 0; i < fileLength; i++) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
@@ -419,6 +448,7 @@ void findVeryOldWithALotOfGoals(char *fileName) {
 
   fseek(f, 0, SEEK_SET);
 
+  // Finding very old people with maximum goals number.
   for (int i = 0; i < fileLength; i++) {
     fread(&entry, sizeof(struct footballerType), 1, f);
     
@@ -439,6 +469,7 @@ void findVeryOldWithALotOfGoals(char *fileName) {
   printf("\n");
 }
 
+// Function printing find all operations codes list.
 void printFindAllOperationsList() {
   printf("\n");
   printf("%30s %3s", "full name:", "1\n");
@@ -451,6 +482,7 @@ void printFindAllOperationsList() {
   printf("\n\n");
 }
 
+// Function starting find all entries menu.
 void startFindAllEntriesMenu() {
   printf("\n");
   printFindAllOperationsList();
@@ -516,6 +548,7 @@ void startFindAllEntriesMenu() {
   }
 }
 
+// Function printing main operations codes list.
 void printMainOperationsList() {
   printf("\n");
   printf("%30s %3s", "append entry:", "1\n");
@@ -527,6 +560,7 @@ void printMainOperationsList() {
   printf("\n\n");
 }
 
+// Function starting main menu.
 void startMenu() {
   printf("\n");
   printMainOperationsList();
@@ -586,6 +620,7 @@ void startMenu() {
 }
 
 int main() {
+  // Use user input.
   #if INPUT_TYPE == 'u'
   printf("User input.\n");
 
@@ -593,6 +628,7 @@ int main() {
 
   getFootballerByUser(&footballer);
 
+  // Use array input.
   #else
   printf("Input from array.\n");
 
@@ -698,6 +734,7 @@ int main() {
     .numberOfGoals=4,
   };
 
+  // Initializing database.
   appendEntry(FILE_NAME, sasha2);
   appendEntry(FILE_NAME, alex);
   appendEntry(FILE_NAME, sasha);
