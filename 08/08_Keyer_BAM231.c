@@ -1,5 +1,3 @@
-#pragma once
-
 #include "football.h" // Headers file.
 
 #include <stdio.h> // Input/output library.
