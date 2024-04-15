@@ -25,13 +25,18 @@ long parseStringToLongInt(char* s) {
   long out = 0;
   int placeholder10 = 1;
   int sLength = strlen(s);
+  int k = 1;
+
+  if (s[0] == '-') {
+    k = -1;
+  }
 
   for (int i = sLength - 1; i >= 0; i--) {
     if (s[i] == ' ' || s[i] < '0' || s[i] > '9') {
       continue;
     }
 
-    out += placeholder10 * (s[i] - '0');
+    out += k * placeholder10 * (s[i] - '0');
     placeholder10 *= 10;
   }
 
@@ -61,8 +66,7 @@ PList* parsePStringToPList(char* pStringP) {
 
   PListItem* cur = out->headP;
 
-  char aString[100] = "";
-  char nString[100] = "";
+  char placeholderP[100] = "";
 
   for (int i = 0; pStringP[i] != 0; i++) {
     if (pStringP[i] == ' ') {
@@ -70,17 +74,25 @@ PList* parsePStringToPList(char* pStringP) {
     }
 
     if (pStringP[i] == '+' || pStringP[i] == '-') {
-      if (aString[0] != 0) {
-        // cur->valueP->a = ;
+      if (placeholderP[0] != 0) {
+        cur->valueP->n = parseStringToLongInt(placeholderP);
+        cur = (PListItem*)malloc(sizeof(PListItem));
+
+        placeholderP[0] = placeholderP[i];
+        placeholderP[1] = 0;
       }
     }
 
     if (pStringP[i] == 'x') {
-
+      if (placeholderP[0] != 0) {
+        cur->valueP->a = parseStringToLongInt(placeholderP);
+        placeholderP[0] = 0;
+      }
     }
 
-    if (pStringP[i] == '^') {
-
+    if (pStringP[i] <= '9' && pStringP[i] >= '0') {
+      placeholderP[strlen(placeholderP) + 1] = 0;
+      placeholderP[strlen(placeholderP)] = pStringP[i];
     }
   }
 }
@@ -117,7 +129,9 @@ int main() {
   readPStringFromUser(1, pStringP1);
   readPStringFromUser(2, pStringP2);
 
-  parsePStringToPList(pStringP1);
+  PList* pListP1 = parsePStringToPList(pStringP1);
+
+  printf("%d", pListP1->headP->valueP->a);
 
   // printf("Polynomials mixin: %s\n", mixTwoPStrings(pStringP1, pStringP2));
 
