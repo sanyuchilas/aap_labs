@@ -1,6 +1,5 @@
 #include <stdio.h> // Input/output library.
 #include <stdlib.h> // Memory allocation.
-#include <time.h> // Time library.
 #include <assert.h> // Assertion library.
 #include <string.h> // String functions library.
 
@@ -43,26 +42,36 @@ long parseStringToLongInt(char* s) {
   return out;
 }
 
-char* parsePListToPString(PList* pListP) {
-  char* out = (char*)malloc(2 * sizeof(char));
+void printPList(PList* pListP) {
+  PListItem* cur = pListP->headP;
 
-  if (pListP == NULL) {
-    out = NULL;
-    return out;
+  if (cur == NULL) {
+    printf("unfortunately this polynomial list is incorrect or empty =(\n");
   }
 
-  PListItem* cur = pListP->headP, *prev = NULL;
+  char tmp = '+';
 
-  while (cur->nextP != NULL) {
-    // out
+  while (cur != NULL) {
+    if (cur->valueP->a < 0) {
+      tmp = 0;
+    } else {
+      tmp = '+';
+    }
+
+    printf("%c%ldx^%ld", tmp, cur->valueP->a, cur->valueP->n);
+
+    cur = cur->nextP;
   }
-
-  return out;
 }
 
 PList* parsePStringToPList(char* pStringP) {
   PList* out = (PList*)malloc(sizeof(PList));
   out->headP = (PListItem*)malloc(sizeof(PListItem));
+
+  if (pStringP[0] == 0) {
+    out->headP = NULL;
+    return out;
+  }
 
   PListItem* cur = out->headP;
   cur->valueP = (M*)malloc(sizeof(M));
@@ -74,54 +83,93 @@ PList* parsePStringToPList(char* pStringP) {
       continue;
     }
 
-    if (pStringP[i] == '+' || pStringP[i] == '-') {
-      if (placeholderP[0] != 0) {
-        cur->valueP->n = parseStringToLongInt(placeholderP);
+    if ((pStringP[i] == '+' || pStringP[i] == '-') && placeholderP[0] != 0) {
+      cur->valueP->n = parseStringToLongInt(placeholderP);
 
-        cur->nextP = (PListItem*)malloc(sizeof(PListItem));
-        cur = cur->nextP;
-        cur->valueP = (M*)malloc(sizeof(M));
+      cur->nextP = (PListItem*)malloc(sizeof(PListItem));
+      cur = cur->nextP;
+      cur->valueP = (M*)malloc(sizeof(M));
 
-        placeholderP[0] = placeholderP[i];
-        placeholderP[1] = 0;
-      }
+      placeholderP[0] = placeholderP[i];
+      placeholderP[1] = 0;
     }
 
     if (pStringP[i] == 'x') {
-      if (placeholderP[0] != 0) {
-        cur->valueP->a = parseStringToLongInt(placeholderP);
-        placeholderP[0] = 0;
-      }
+      cur->valueP->a = parseStringToLongInt(placeholderP);
+      assert(cur->valueP->a != 0);
+      
+      placeholderP[0] = 0;
     }
 
     if (pStringP[i] <= '9' && pStringP[i] >= '0') {
       placeholderP[strlen(placeholderP) + 1] = 0;
       placeholderP[strlen(placeholderP)] = pStringP[i];
+    } else if (
+      pStringP[i] != 'x'
+      && pStringP[i] != '+'
+      && pStringP[i] != '-'
+      && pStringP[i] != '^'
+    ) {
+      out->headP = NULL;
+      return out;
     }
   }
 
   cur->valueP->n = parseStringToLongInt(placeholderP);
+  cur->nextP = NULL;
 
   return out;
 }
 
-void printPList(PList* PListP) {
-  printf("%s", parsePListToPString(PListP));
-};
-
 PList* mixTwoPLists(PList* pListP1, PList* pListP2) {
+  PList* out;
 
+  PListItem* cur1 = pListP1->headP;
+  PListItem* cur2 = pListP2->headP;
+
+  PListItem* curGood = NULL;
+  PListItem* prevGood = NULL;
+
+  out->headP = NULL;
+
+  while (cur1 != NULL) {
+    cur2 = pListP2->headP;
+
+    while (cur2 != NULL && cur2->valueP->n != cur1->valueP->n) {
+      cur2 = cur2->nextP;
+    }
+
+    if (cur2 != NULL) {
+      if (cur2->valueP->a >= cur1->valueP->a) {
+        curGood = cur2;
+      } else {
+        curGood = cur1;
+      }
+
+      if (out->headP == NULL) {
+        out->headP = curGood;
+      } else {
+        prevGood->nextP = curGood;
+      }
+
+      prevGood = curGood;
+    }
+
+    cur1 = cur1->nextP;
+  }
+
+  return out;
 };
 
-char* mixTwoPStrings(char* pStringP1, char* pStringP2) {
-  return parsePListToPString(mixTwoPLists(
+PList* mixTwoPStrings(char* pStringP1, char* pStringP2) {
+  return mixTwoPLists(
     parsePStringToPList(pStringP1),
     parsePStringToPList(pStringP2)
-  ));
+  );
 }
 
 void readPStringFromUser(int pi, char* pStringP) {
-  printf("Enter P%d:", pi);
+  printf("Enter P%d: ", pi);
 
   fflush(stdin);
   fgets(pStringP, 100, stdin);
@@ -137,7 +185,8 @@ int main() {
   readPStringFromUser(1, pStringP1);
   readPStringFromUser(2, pStringP2);
 
-  // printf("Polynomials mixin: %s\n", mixTwoPStrings(pStringP1, pStringP2));
+  printf("Polynomials mixin: ");
+  printPList(mixTwoPStrings(pStringP1, pStringP2));
 
   free(pStringP1);
   free(pStringP2);
