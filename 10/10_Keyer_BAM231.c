@@ -65,6 +65,7 @@ PList* parsePStringToPList(char* pStringP) {
   out->headP = (PListItem*)malloc(sizeof(PListItem));
 
   PListItem* cur = out->headP;
+  cur->valueP = (M*)malloc(sizeof(M));
 
   char placeholderP[100] = "";
 
@@ -76,7 +77,10 @@ PList* parsePStringToPList(char* pStringP) {
     if (pStringP[i] == '+' || pStringP[i] == '-') {
       if (placeholderP[0] != 0) {
         cur->valueP->n = parseStringToLongInt(placeholderP);
-        cur = (PListItem*)malloc(sizeof(PListItem));
+
+        cur->nextP = (PListItem*)malloc(sizeof(PListItem));
+        cur = cur->nextP;
+        cur->valueP = (M*)malloc(sizeof(M));
 
         placeholderP[0] = placeholderP[i];
         placeholderP[1] = 0;
@@ -95,6 +99,10 @@ PList* parsePStringToPList(char* pStringP) {
       placeholderP[strlen(placeholderP)] = pStringP[i];
     }
   }
+
+  cur->valueP->n = parseStringToLongInt(placeholderP);
+
+  return out;
 }
 
 void printPList(PList* PListP) {
@@ -128,10 +136,6 @@ int main() {
 
   readPStringFromUser(1, pStringP1);
   readPStringFromUser(2, pStringP2);
-
-  PList* pListP1 = parsePStringToPList(pStringP1);
-
-  printf("%d", pListP1->headP->valueP->a);
 
   // printf("Polynomials mixin: %s\n", mixTwoPStrings(pStringP1, pStringP2));
 
