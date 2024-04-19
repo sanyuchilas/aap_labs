@@ -73,7 +73,8 @@ PList* parsePStringToPList(char* pStringP) {
     return out;
   }
 
-  PListItem* cur = out->headP;
+  PListItem* cur = (PListItem*)malloc(sizeof(PListItem));
+  out->headP = cur;
   cur->valueP = (M*)malloc(sizeof(M));
 
   char placeholderP[100] = "";
