@@ -86,14 +86,16 @@ PList* parsePStringToPList(char* pStringP) {
       continue;
     }
 
-    if ((pStringP[i] == '+' || pStringP[i] == '-') && placeholderP[0] != 0) {
-      cur->valueP->n = parseStringToLongInt(placeholderP);
+    if ((pStringP[i] == '+' || pStringP[i] == '-')) {
+      if (placeholderP[0] != 0) {
+        cur->valueP->n = parseStringToLongInt(placeholderP);
 
-      cur->nextP = (PListItem*)malloc(sizeof(PListItem));
-      cur = cur->nextP;
-      cur->valueP = (M*)malloc(sizeof(M));
+        cur->nextP = (PListItem*)malloc(sizeof(PListItem));
+        cur = cur->nextP;
+        cur->valueP = (M*)malloc(sizeof(M));
+      }
 
-      placeholderP[0] = placeholderP[i];
+      placeholderP[0] = pStringP[i];
       placeholderP[1] = 0;
     }
 
