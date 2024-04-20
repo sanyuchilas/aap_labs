@@ -66,18 +66,78 @@ void printPList(PList* pListP) {
   printf("\n");
 }
 
+PListItem* findWithSameN(PList* pList, int n) {
+  PListItem* cur = pList->headP;
+
+  while (cur != NULL) {
+    if (cur->valueP->n == n) {
+      return cur;
+    }
+
+    cur = cur->nextP;
+  }
+
+  return NULL;
+}
+
+PListItem* clearPListItem(PListItem* pListItem) {
+  PListItem* nextP = pListItem->nextP;
+
+  free(pListItem->valueP);
+  free(pListItem);
+
+  return nextP;
+}
+
+PList* clearPList(PList* pList) {
+  PListItem* cur = pList->headP;
+
+  while (cur != NULL) {
+    cur = clearPListItem(cur);
+  }
+
+  free(pList);
+  pList = NULL;
+
+  return pList;
+}
+
+void clearMonomWithA0(PList* pList) {
+  PListItem* cur = pList->headP->nextP;
+  PListItem* prev = pList->headP;
+
+  while (cur != NULL) {
+    if (cur->valueP->a == 0) {
+      prev->nextP = cur->nextP;
+      clearPListItem(cur);
+    } else {
+      prev = prev->nextP;
+    }
+
+    cur = prev->nextP;
+  }
+
+  if (pList->headP->valueP->a == 0) {
+    cur = pList->headP;
+    pList->headP = pList->headP->nextP;
+    clearPListItem(cur);
+  }
+}
+
 PList* parsePStringToPList(char* pStringP) {
   PList* out = (PList*)malloc(sizeof(PList));
   out->headP = (PListItem*)malloc(sizeof(PListItem));
+  out->headP = NULL;
 
   if (pStringP[0] == 0) {
-    out->headP = NULL;
     return out;
   }
 
+  PListItem* sameNCandidate = NULL;
+  PListItem* prev = NULL;
   PListItem* cur = (PListItem*)malloc(sizeof(PListItem));
-  out->headP = cur;
   cur->valueP = (M*)malloc(sizeof(M));
+  cur->nextP = NULL;
 
   char placeholderP[100] = "";
 
@@ -90,9 +150,24 @@ PList* parsePStringToPList(char* pStringP) {
       if (placeholderP[0] != 0) {
         cur->valueP->n = parseStringToLongInt(placeholderP);
 
-        cur->nextP = (PListItem*)malloc(sizeof(PListItem));
-        cur = cur->nextP;
+        PListItem* sameNCandidate = findWithSameN(out, cur->valueP->n);
+
+        if (sameNCandidate == NULL) {
+          if (out->headP == NULL) {
+            out->headP = cur;
+          } else {
+            prev->nextP = cur;
+          }
+
+          prev = cur;
+        } else {
+          sameNCandidate->valueP->a += cur->valueP->a;
+          clearPListItem(cur);
+        }
+
+        cur = (PListItem*)malloc(sizeof(PListItem));
         cur->valueP = (M*)malloc(sizeof(M));
+        cur->nextP = NULL;
       }
 
       placeholderP[0] = pStringP[i];
@@ -121,35 +196,23 @@ PList* parsePStringToPList(char* pStringP) {
   }
 
   cur->valueP->n = parseStringToLongInt(placeholderP);
-  cur->nextP = NULL;
+
+  sameNCandidate = findWithSameN(out, cur->valueP->n);
+
+  if (sameNCandidate == NULL) {
+    if (out->headP == NULL) {
+      out->headP = cur;
+    } else {
+      prev->nextP = cur;
+    }
+  } else {
+    sameNCandidate->valueP->a += cur->valueP->a;
+    clearPListItem(cur);
+  }
+
+  clearMonomWithA0(out);
 
   return out;
-}
-
-PListItem* clearPListItem(PListItem* pListItem) {
-  PListItem* nextP = pListItem->nextP;
-
-  free(pListItem->valueP);
-  free(pListItem);
-
-  return nextP;
-}
-
-PList* clearPList(PList* pList) {
-  PListItem* cur = pList->headP;
-
-  if (cur == NULL) {
-    return pList;
-  }
-
-  while (cur != NULL) {
-    cur = clearPListItem(cur);
-  }
-
-  free(pList);
-  pList->headP = NULL;
-
-  return pList;
 }
 
 void copyPListItem(PListItem* new, PListItem* cur) {
@@ -216,7 +279,6 @@ int main() {
 
   readPStringFromUser(1, pStringP1);
   readPStringFromUser(2, pStringP2);
-
   
   PList* pListP1 = parsePStringToPList(pStringP1);
   PList* pListP2 = parsePStringToPList(pStringP2);

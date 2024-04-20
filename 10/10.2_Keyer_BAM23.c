@@ -117,7 +117,6 @@ void solution(char* s) {\
     WordListItem* minimumWordItem = findMinimumWordItem(wordList);
     WordListItem* insertItem = (WordListItem*)malloc(sizeof(WordListItem));
 
-
     insertItem->valueP = inverseWord(minimumWordItem->valueP);
     
     insertItem->prevP = minimumWordItem->prevP;
@@ -125,7 +124,6 @@ void solution(char* s) {\
 
     minimumWordItem->prevP->nextP = insertItem;
     minimumWordItem->prevP = insertItem;
-
 
     printf("Modifed string: ");
     printWordList(wordList);
