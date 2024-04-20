@@ -62,6 +62,8 @@ void printPList(PList* pListP) {
 
     cur = cur->nextP;
   }
+
+  printf("\n");
 }
 
 PList* parsePStringToPList(char* pStringP) {
@@ -148,13 +150,18 @@ PList* clearPList(PList* pList) {
   return pList;
 }
 
+void copyPListItem(PListItem* new, PListItem* cur) {
+  new->nextP = NULL;
+  new->valueP->a = cur->valueP->a;
+  new->valueP->n = cur->valueP->n;
+}
+
 PList* mixTwoPLists(PList* pListP1, PList* pListP2) {
   PList* out = (PList*)malloc(sizeof(PList));
 
   PListItem* cur1 = pListP1->headP;
   PListItem* cur2 = pListP2->headP;
 
-  PListItem* curGood = NULL;
   PListItem* prevGood = NULL;
 
   out->headP = NULL;
@@ -167,10 +174,13 @@ PList* mixTwoPLists(PList* pListP1, PList* pListP2) {
     }
 
     if (cur2 != NULL) {
+      PListItem* curGood = (PListItem*)malloc(sizeof(PListItem));
+      curGood->valueP = (M*)malloc(sizeof(M));
+
       if (cur2->valueP->a >= cur1->valueP->a) {
-        curGood = cur2;
+        copyPListItem(curGood, cur2);
       } else {
-        curGood = cur1;
+        copyPListItem(curGood, cur1);
       }
 
       if (out->headP == NULL) {
@@ -205,17 +215,24 @@ int main() {
   readPStringFromUser(1, pStringP1);
   readPStringFromUser(2, pStringP2);
 
-  printf("Polynomials mixin: ");
   
   PList* pListP1 = parsePStringToPList(pStringP1);
   PList* pListP2 = parsePStringToPList(pStringP2);
 
+  printPList(pListP1);
+  printPList(pListP2);
+
   PList* finalPList = mixTwoPLists(pListP1, pListP2);
   
+  printf("Polynomials mixin: ");
   printPList(finalPList);
+
 
   clearPList(pListP1);
   clearPList(pListP2);
+  clearPList(finalPList);
+
+  finalPList->headP = NULL;
 
   free(pStringP1);
   free(pStringP2);
