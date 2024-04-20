@@ -11,6 +11,7 @@ typedef struct WordListItem WordListItem;
 
 struct WordList {
     WordListItem* headP;
+    WordListItem* tailP;
 };
 typedef struct WordList WordList;
 
@@ -37,8 +38,6 @@ WordList* parseStringToWordList(char* s) {
     cur->valueP[0] = 0;
     cur->prevP = NULL;
 
-    printf("Parse WordList to string: ");
-
     for (int i = 0; s[i] != 0; i++) {
         if (s[i] != ' ') {
             cur->valueP[strlen(cur->valueP) + 1] = 0;
@@ -58,6 +57,8 @@ WordList* parseStringToWordList(char* s) {
     cur->prevP = prev;
     cur->nextP = NULL;
 
+    out->tailP = cur;
+
     return out;
 };
 
@@ -67,18 +68,39 @@ void printWordList(WordList* wordList) {
         return;
     }
 
+    printf("Parse WordList to string: ");
+
     WordListItem* cur = wordList->headP;
 
     printf("%s", cur->valueP);
     cur = cur->nextP;
+
 
     while (cur != NULL) {
         printf(" %s", cur->valueP);
         cur = cur->nextP;
     }
 
-    printf(".");
+    printf(".\n");
 };
+
+char* inverseWord(char* word) {
+    char* out = (char*)malloc(100 * sizeof(char));
+
+    int wordLength = strlen(word);
+
+    out[wordLength] = 0;
+
+    for (int i = 0; word[i] != 0; i++) {
+        out[wordLength - i - 1] = word[i];
+    }
+
+    return out;
+}
+
+void solution(WordList* wordList) {
+
+}
 
 // Function reading a string from stdin.
 char* readingStringFromUser() {
