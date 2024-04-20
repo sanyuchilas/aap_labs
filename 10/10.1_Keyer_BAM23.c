@@ -122,8 +122,34 @@ PList* parsePStringToPList(char* pStringP) {
   return out;
 }
 
+PListItem* clearPListItem(PListItem* pListItem) {
+  PListItem* nextP = pListItem->nextP;
+
+  free(pListItem->valueP);
+  free(pListItem);
+
+  return nextP;
+}
+
+PList* clearPList(PList* pList) {
+  PListItem* cur = pList->headP;
+
+  if (cur == NULL) {
+    return pList;
+  }
+
+  while (cur != NULL) {
+    cur = clearPListItem(cur);
+  }
+
+  free(pList);
+  pList->headP = NULL;
+
+  return pList;
+}
+
 PList* mixTwoPLists(PList* pListP1, PList* pListP2) {
-  PList* out;
+  PList* out = (PList*)malloc(sizeof(PList));
 
   PListItem* cur1 = pListP1->headP;
   PListItem* cur2 = pListP2->headP;
@@ -162,13 +188,6 @@ PList* mixTwoPLists(PList* pListP1, PList* pListP2) {
   return out;
 };
 
-PList* mixTwoPStrings(char* pStringP1, char* pStringP2) {
-  return mixTwoPLists(
-    parsePStringToPList(pStringP1),
-    parsePStringToPList(pStringP2)
-  );
-}
-
 void readPStringFromUser(int pi, char* pStringP) {
   printf("Enter P%d: ", pi);
 
@@ -178,8 +197,8 @@ void readPStringFromUser(int pi, char* pStringP) {
 }
 
 int main() {
-  char* pStringP1 = malloc(100 * sizeof(char));
-  char* pStringP2 = malloc(100 * sizeof(char));
+  char* pStringP1 = (char*)malloc(100 * sizeof(char));
+  char* pStringP2 = (char*)malloc(100 * sizeof(char));
 
   printf("Lab 10. Keyer, BAM231.\n");
 
@@ -187,7 +206,16 @@ int main() {
   readPStringFromUser(2, pStringP2);
 
   printf("Polynomials mixin: ");
-  printPList(mixTwoPStrings(pStringP1, pStringP2));
+  
+  PList* pListP1 = parsePStringToPList(pStringP1);
+  PList* pListP2 = parsePStringToPList(pStringP2);
+
+  PList* finalPList = mixTwoPLists(pListP1, pListP2);
+  
+  printPList(finalPList);
+
+  clearPList(pListP1);
+  clearPList(pListP2);
 
   free(pStringP1);
   free(pStringP2);
