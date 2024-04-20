@@ -68,8 +68,6 @@ void printWordList(WordList* wordList) {
         return;
     }
 
-    printf("Parse WordList to string: ");
-
     WordListItem* cur = wordList->headP;
 
     printf("%s", cur->valueP);
@@ -98,8 +96,39 @@ char* inverseWord(char* word) {
     return out;
 }
 
-void solution(WordList* wordList) {
+WordListItem* findMinimumWordItem(WordList* wordList) {
+    WordListItem* out = wordList->headP;
+    WordListItem* good = out;
+    WordListItem* cur = good;
 
+    while (cur != NULL) {
+        if (strcmp(cur->valueP, good->valueP) <= 0) {
+            good = cur;
+        }
+        cur = cur->nextP;
+    }
+
+    return good;
+}
+
+void solution(char* s) {\
+    WordList* wordList = parseStringToWordList(s);
+
+    WordListItem* minimumWordItem = findMinimumWordItem(wordList);
+    WordListItem* insertItem = (WordListItem*)malloc(sizeof(WordListItem));
+
+
+    insertItem->valueP = inverseWord(minimumWordItem->valueP);
+    
+    insertItem->prevP = minimumWordItem->prevP;
+    insertItem->nextP = minimumWordItem;
+
+    minimumWordItem->prevP->nextP = insertItem;
+    minimumWordItem->prevP = insertItem;
+
+
+    printf("Modifed string: ");
+    printWordList(wordList);
 }
 
 // Function reading a string from stdin.
@@ -118,12 +147,13 @@ char* readingStringFromUser() {
 
 int main() {
     char* s = readingStringFromUser();
+
     if (!isValid(s)) {
         return 1;
     }
 
     printf("Work with string: %s.\n", s);
-    printWordList(parseStringToWordList(s));
+    solution(s);
 
     free(s);
     return 0;
