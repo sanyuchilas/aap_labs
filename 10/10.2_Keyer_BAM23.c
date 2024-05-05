@@ -111,7 +111,7 @@ WordListItem* findMinimumWordItem(WordList* wordList) {
     return good;
 }
 
-void solution(char* s) {\
+void solution(char* s) {
     WordList* wordList = parseStringToWordList(s);
 
     WordListItem* minimumWordItem = findMinimumWordItem(wordList);
