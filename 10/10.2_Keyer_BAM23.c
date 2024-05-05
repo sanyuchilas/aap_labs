@@ -139,6 +139,8 @@ void solution(char* s) {
 
     if (minimumWordItem->prevP) {
         minimumWordItem->prevP->nextP = insertItem;
+    } else {
+        wordList->headP = insertItem;
     }
     
     minimumWordItem->prevP = insertItem;
