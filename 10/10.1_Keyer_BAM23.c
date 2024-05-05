@@ -58,7 +58,7 @@ void printPList(PList* pListP) {
       tmp = '+';
     }
 
-    printf("%c%ldx^%ld", tmp, cur->valueP->a, cur->valueP->n);
+    printf("%c%ldx^%u", tmp, cur->valueP->a, cur->valueP->n);
 
     cur = cur->nextP;
   }
