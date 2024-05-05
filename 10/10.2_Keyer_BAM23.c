@@ -70,13 +70,28 @@ void printWordList(WordList* wordList) {
 
     WordListItem* cur = wordList->headP;
 
+    printf("Next direction: ");
+
     printf("%s", cur->valueP);
     cur = cur->nextP;
-
 
     while (cur != NULL) {
         printf(" %s", cur->valueP);
         cur = cur->nextP;
+    }
+
+    printf(".\n");
+
+    printf("Prev direction: ");
+
+    cur = wordList->tailP;
+
+    printf("%s", cur->valueP);
+    cur = cur->prevP;
+
+    while (cur != NULL) {
+        printf(" %s", cur->valueP);
+        cur = cur->prevP;
     }
 
     printf(".\n");
@@ -122,10 +137,13 @@ void solution(char* s) {
     insertItem->prevP = minimumWordItem->prevP;
     insertItem->nextP = minimumWordItem;
 
-    minimumWordItem->prevP->nextP = insertItem;
+    if (minimumWordItem->prevP) {
+        minimumWordItem->prevP->nextP = insertItem;
+    }
+    
     minimumWordItem->prevP = insertItem;
 
-    printf("Modifed string: ");
+    printf("Modifed string:\n");
     printWordList(wordList);
 }
 
