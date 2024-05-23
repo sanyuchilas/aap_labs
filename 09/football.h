@@ -9,3 +9,5 @@ struct footballerType {
   int numberOfGames;
   int numberOfGoals;
 };
+
+typedef struct footballerType footballerType;
