@@ -1,7 +1,7 @@
 #define fieldSize fieldLength * sizeof(char)
 #define entryLength 6
 
-struct footballerType {
+struct Footballer {
   char* fullName;
   char* clubName;
   char* role;
@@ -9,3 +9,5 @@ struct footballerType {
   int numberOfGames;
   int numberOfGoals;
 };
+
+typedef struct Footballer Footballer;
