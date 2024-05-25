@@ -1,6 +1,3 @@
-#define fieldSize fieldLength * sizeof(char)
-#define entryLength 6
-
 struct Footballer {
   char* fullName;
   char* clubName;

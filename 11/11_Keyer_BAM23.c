@@ -22,7 +22,7 @@ void printTableHeader() {
 
 // Function printing footballer.
 void printFootballer(Footballer* footballer) {
-  printf("%4d|%30s|%30s|%30s|%10d|%10d|%10d|\n", -1, footballer->fullName, footballer->clubName, footballer->role, footballer->age, footballer->numberOfGames, footballer->numberOfGoals);
+  printf("%4s|%30s|%30s|%30s|%10d|%10d|%10d|\n", "?", footballer->fullName, footballer->clubName, footballer->role, footballer->age, footballer->numberOfGames, footballer->numberOfGoals);
   printHr(65);
 }
 
@@ -198,26 +198,178 @@ int findAllNodesInBinarySearchTreeByFootballerFullName(Node* root, char* fullNam
   return nodesCount;
 }
 
+// =================
+// Hash table dope.
+// Hash table crazy.
+// Hash table here.
+// =================
+
+struct ListItem {
+  Footballer* footballer;
+  struct ListItem* next;
+};
+typedef struct ListItem ListItem;
+
+ListItem* createListItem(Footballer* footballer) {
+  ListItem* listItem = (ListItem*)malloc(sizeof(ListItem));
+
+  listItem->footballer = footballer;
+  listItem->next = NULL;
+
+  return listItem;
+}
+
+struct HashTable {
+  int size;
+  ListItem** table;
+};
+typedef struct HashTable HashTable;
+
+HashTable* createHashTable(int size) {
+  HashTable* hashTable = (HashTable*)malloc(sizeof(HashTable));
+  ListItem** table = (ListItem**)malloc(sizeof(ListItem*) * size);
+
+  hashTable->table = table;
+  hashTable->size = size;
+
+  for (int i = 0; i < size; i++) {
+    table[i] = NULL;
+  }
+
+  return hashTable;
+}
+
+int hashFunction(HashTable* hashTable, char* fullName) {
+  int hash = 0;
+
+  while (*fullName != 0) {
+    hash = (hash + *fullName++) % hashTable->size;
+  }
+
+  return hash;
+}
+
+void insertFootballerIntoHashTable(HashTable* hashTable, Footballer* footballer) {
+  int hash = hashFunction(hashTable, footballer->fullName);
+
+  ListItem* listItem = createListItem(footballer);
+
+  listItem->next = hashTable->table[hash];
+  hashTable->table[hash] = listItem;
+}
+
+HashTable* createHashTableFromFootballersArray(Footballer* footballers, int footballersCount) {
+  HashTable* hashTable = createHashTable(footballersCount);
+
+  for (int i = 0; i < footballersCount; i++) {
+    insertFootballerIntoHashTable(hashTable, footballers + i);
+  }
+
+  return hashTable;
+}
+
+int findAllListItemsInHashTableByFootballerFullName(HashTable* hashTable, char* fullName, ListItem** listItems) {
+  int hash = hashFunction(hashTable, fullName);
+
+  int listItemsCount = 0;
+
+  ListItem* listItem = hashTable->table[hash];
+
+  while (listItem != NULL) {
+    if (strcmp(listItem->footballer->fullName, fullName) == 0) {
+      listItems[listItemsCount] = listItem;
+    }
+
+    listItem = listItem->next;
+
+    listItemsCount++;
+  }
+
+  return listItemsCount;
+}
+
+void printFootballersHashTable(HashTable* hashTable) {
+  for (int hash = 0; hash < hashTable->size; hash++) {
+    if (hashTable->table[hash] == NULL) {
+      continue;
+    }
+    
+    ListItem* listItem = hashTable->table[hash];
+
+    while (listItem != NULL) {
+      printFootballer(listItem->footballer);
+
+      listItem = listItem->next;
+    }
+  }
+}
+
+void printFootballersListItems(ListItem** listItems, int listItemsCount) {
+  if (listItemsCount == 0) {
+    printf("Footballers with this name were not found.\n");
+  }
+
+  for (int i = 0; i < listItemsCount; i++) {
+    printFootballer(listItems[i]->footballer);
+  }
+}
+
 int main() {
   printf("Lab 11. Keyer, BAM231.\n");
 
-  Footballer* footballers = generateFootballersArray(3);
+  int n = 3;
+  char* fullName = "b";
 
-  Node* root = createTreeFromFootballersArray(footballers, 3);
-  Node** allGoodNodes = (Node**)malloc(sizeof(Node*) * 3);
+  printf("\n==== Initialize program ====\n\n");
 
-  printf("Print footballers array.\n");
-  printFootballersArray(footballers, 3);
+  // Prepare program and generate footballers array.
 
-  printf("Print footballers binary tree.\n");
+  Footballer* footballers = generateFootballersArray(n);
+
+  printf("\nPrint footballers array.\n");
+  printFootballersArray(footballers, n);
+
+  printf("\n==== Binary tree ====\n");
+
+  // Create binary search tree.
+
+  Node* root = createTreeFromFootballersArray(footballers, n);
+
+  printf("\nPrint footballers binary tree.\n");
   printTableHeader();
   printFootabllersBinarySearchTree(root);
 
-  printf("All nodes with footballer fullName = \"a\".\n");
-  int nodesCount = findAllNodesInBinarySearchTreeByFootballerFullName(root, "ab", allGoodNodes);
-  
+  // Work with binary search tree.
+
+  Node** nodes = (Node**)malloc(sizeof(Node*) * n);
+
+  int nodesCount = findAllNodesInBinarySearchTreeByFootballerFullName(root, fullName, nodes);
+
+  printf("\nAll nodes with footballer fullName = \"%s\".\n", fullName);
   printTableHeader();
-  printNodesArray(allGoodNodes, nodesCount);
+  printNodesArray(nodes, nodesCount);
+
+  printf("\n==== Hash table ====\n");
+
+  // Create hash table.
+
+  HashTable* hashTable = createHashTableFromFootballersArray(footballers, n);
+
+  printf("\nPrint footballers hash table.\n");
+  printTableHeader();
+  printFootballersHashTable(hashTable);
+
+  // Work with hash table.
+
+  ListItem** listItems = (ListItem**)malloc(sizeof(ListItem*) * n);
+
+  int listItemsCount = findAllListItemsInHashTableByFootballerFullName(hashTable, fullName, listItems);
+
+  printf("\nAll list items with footballer fullName = \"%s\".\n", fullName);
+  printTableHeader();
+  printFootballersListItems(listItems, listItemsCount);
+
+  // End program and free allocated memory.
 
   free(footballers);
   free(root);
