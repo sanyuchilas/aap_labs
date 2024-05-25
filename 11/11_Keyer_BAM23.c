@@ -332,9 +332,9 @@ void test(int footballersCount, char* fullName) {
 
   Node* root = createTreeFromFootballersArray(footballers, footballersCount);
 
-  printf("\nPrint footballers binary tree.\n");
-  printTableHeader();
-  printFootabllersBinarySearchTree(root);
+  // printf("\nPrint footballers binary tree.\n");
+  // printTableHeader();
+  // printFootabllersBinarySearchTree(root);
 
   // Work with binary search tree.
 
@@ -352,9 +352,9 @@ void test(int footballersCount, char* fullName) {
 
   HashTable* hashTable = createHashTableFromFootballersArray(footballers, footballersCount);
 
-  printf("\nPrint footballers hash table.\n");
-  printTableHeader();
-  printFootballersHashTable(hashTable);
+  // printf("\nPrint footballers hash table.\n");
+  // printTableHeader();
+  // printFootballersHashTable(hashTable);
 
   // Work with hash table.
 
@@ -377,10 +377,7 @@ void test(int footballersCount, char* fullName) {
 int main() {
   printf("Lab 11. Keyer, BAM231.\n");
 
-  test(3, "a");
-  test(3, "b");
-  test(3, "c");
-  test(3, "e");
+  test(100, "ab");
 
   return 0;
 }
