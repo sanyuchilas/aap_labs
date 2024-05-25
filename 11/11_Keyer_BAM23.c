@@ -278,11 +278,10 @@ int findAllListItemsInHashTableByFootballerFullName(HashTable* hashTable, char* 
   while (listItem != NULL) {
     if (strcmp(listItem->footballer->fullName, fullName) == 0) {
       listItems[listItemsCount] = listItem;
+      listItemsCount++;
     }
 
     listItem = listItem->next;
-
-    listItemsCount++;
   }
 
   return listItemsCount;
@@ -307,6 +306,7 @@ void printFootballersHashTable(HashTable* hashTable) {
 void printFootballersListItems(ListItem** listItems, int listItemsCount) {
   if (listItemsCount == 0) {
     printf("Footballers with this name were not found.\n");
+    return;
   }
 
   for (int i = 0; i < listItemsCount; i++) {
@@ -314,26 +314,23 @@ void printFootballersListItems(ListItem** listItems, int listItemsCount) {
   }
 }
 
-int main() {
-  printf("Lab 11. Keyer, BAM231.\n");
+int testsCounter = 1;
 
-  int n = 3;
-  char* fullName = "b";
-
-  printf("\n==== Initialize program ====\n\n");
+void test(int footballersCount, char* fullName) {
+  printf("\n============================================================= Test %d =============================================================\n\n", testsCounter++);
 
   // Prepare program and generate footballers array.
 
-  Footballer* footballers = generateFootballersArray(n);
+  Footballer* footballers = generateFootballersArray(footballersCount);
 
   printf("\nPrint footballers array.\n");
-  printFootballersArray(footballers, n);
+  printFootballersArray(footballers, footballersCount);
 
   printf("\n==== Binary tree ====\n");
 
   // Create binary search tree.
 
-  Node* root = createTreeFromFootballersArray(footballers, n);
+  Node* root = createTreeFromFootballersArray(footballers, footballersCount);
 
   printf("\nPrint footballers binary tree.\n");
   printTableHeader();
@@ -341,7 +338,7 @@ int main() {
 
   // Work with binary search tree.
 
-  Node** nodes = (Node**)malloc(sizeof(Node*) * n);
+  Node** nodes = (Node**)malloc(sizeof(Node*) * footballersCount);
 
   int nodesCount = findAllNodesInBinarySearchTreeByFootballerFullName(root, fullName, nodes);
 
@@ -353,7 +350,7 @@ int main() {
 
   // Create hash table.
 
-  HashTable* hashTable = createHashTableFromFootballersArray(footballers, n);
+  HashTable* hashTable = createHashTableFromFootballersArray(footballers, footballersCount);
 
   printf("\nPrint footballers hash table.\n");
   printTableHeader();
@@ -361,7 +358,7 @@ int main() {
 
   // Work with hash table.
 
-  ListItem** listItems = (ListItem**)malloc(sizeof(ListItem*) * n);
+  ListItem** listItems = (ListItem**)malloc(sizeof(ListItem*) * footballersCount);
 
   int listItemsCount = findAllListItemsInHashTableByFootballerFullName(hashTable, fullName, listItems);
 
@@ -373,6 +370,17 @@ int main() {
 
   free(footballers);
   free(root);
+  free(nodes);
+  free(listItems);
+}
+
+int main() {
+  printf("Lab 11. Keyer, BAM231.\n");
+
+  test(3, "a");
+  test(3, "b");
+  test(3, "c");
+  test(3, "e");
 
   return 0;
 }
