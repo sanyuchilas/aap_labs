@@ -455,12 +455,12 @@ void runTests(int footballersCount, int testsCount, int printEveryTest) {
 int main() {
   printf("Lab 11. Keyer, BAM231.\n");
 
-  runTests(1000, 100, 0);
-  runTests(5000, 100, 0);
-  runTests(10000, 100, 0);
-  runTests(20000, 100, 0);
-  runTests(50000, 100, 0);
-  runTests(100000, 100, 0);
+  runTests(1000, 1000, 0);
+  runTests(5000, 1000, 0);
+  runTests(10000, 500, 0);
+  runTests(20000, 500, 0);
+  runTests(50000, 250, 0);
+  runTests(100000, 250, 0);
   runTests(1000000, 100, 0);
 
   return 0;
