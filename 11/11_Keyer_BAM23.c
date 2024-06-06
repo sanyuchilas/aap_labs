@@ -1,9 +1,12 @@
 #include <stdio.h> // Input/output library.
 #include <stdlib.h> // Memory allocation.
+#include <time.h> // Time library.
 #include <assert.h> // Assertion library.
 #include <string.h> // String functions library.
 
 #include "football.h" // Footballer info.
+
+#define TIME 1000000000
 
 // Function printing horizontal line.
 void printHr(int length) {
@@ -60,11 +63,11 @@ char* generateString(int length, int countOfUsedSymbols) {
 }
 
 // Function generating footballer.
-Footballer generateFootballer() {
+Footballer generateFootballer(int rand1, int rand2) {
   Footballer out = {
-    .fullName=generateString(10, 10),
-    .clubName=generateString(10, 10),
-    .role=generateString(10, 10),
+    .fullName=generateString(rand1 % 26, rand2 % 26),
+    .clubName=generateString(10, 26),
+    .role=generateString(10, 26),
     .age=(rand() % 100),
     .numberOfGames=(rand() % 100),
     .numberOfGoals=(rand() % 100),
@@ -74,14 +77,14 @@ Footballer generateFootballer() {
 }
 
 // Function generating footballer array.
-Footballer* generateFootballersArray(int length) {
+Footballer* generateFootballersArray(int length, int rand1, int rand2) {
   Footballer* arr = (Footballer*)malloc(sizeof(Footballer) * length);
   
   for (int i = 0; i < length; i++) {
-    arr[i] = generateFootballer();
+    arr[i] = generateFootballer(rand1, rand2);
   }
 
-  printf("Successfully generated %d footballers array.\n", length);
+  // printf("Successfully generated %d footballers array.\n", length);
   return arr;
 }
 
@@ -337,12 +340,15 @@ void freeHashTableListItems(HashTable* hashTable) {
 
 int testsCounter = 1;
 
-void test(int footballersCount, char* fullName) {
-  printf("\n============================================================= Test %d =============================================================\n\n", testsCounter++);
+void test(int footballersCount, char* fullName, int rand1, int rand2, int* binaryTreeAccTime, int* hashTableAccTime, int printEveryTest) {
+  if (printEveryTest) {
+    printf("\n============================================================= Test %d =============================================================\n\n", testsCounter++);
+    printf("Name=\"%s\"\n", fullName);
+  }
 
   // Prepare program and generate footballers array.
 
-  Footballer* footballers = generateFootballersArray(footballersCount);
+  Footballer* footballers = generateFootballersArray(footballersCount, rand1, rand2);
 
   // printf("\nPrint footballers array.\n");
   // printFootballersArray(footballers, footballersCount);
@@ -361,7 +367,17 @@ void test(int footballersCount, char* fullName) {
 
   Node** nodes = (Node**)malloc(sizeof(Node*) * footballersCount);
 
+  clock_t start = clock();
+
   int nodesCount = findAllNodesInBinarySearchTreeByFootballerFullName(root, fullName, nodes);
+
+  clock_t stop = clock();
+
+  if (printEveryTest) {
+    printf("BinarySearchTree %4s%7d: %.00fns\n", "n=", footballersCount, (double)(stop - start) / CLOCKS_PER_SEC * TIME);
+  }
+
+  *binaryTreeAccTime += (double)(stop - start) / CLOCKS_PER_SEC * TIME;
 
   // printf("\nAll nodes with footballer fullName = \"%s\".\n", fullName);
   // printTableHeader();
@@ -381,7 +397,17 @@ void test(int footballersCount, char* fullName) {
 
   ListItem** listItems = (ListItem**)malloc(sizeof(ListItem*) * footballersCount);
 
+  start = clock();
+
   int listItemsCount = findAllListItemsInHashTableByFootballerFullName(hashTable, fullName, listItems);
+
+  stop = clock();
+
+  if (printEveryTest) {
+    printf("HashTable %11s%7d: %.00fns\n", "n=", footballersCount, (double)(stop - start) / CLOCKS_PER_SEC * TIME);
+  }
+
+  *hashTableAccTime += (double)(stop - start) / CLOCKS_PER_SEC * TIME;
 
   // printf("\nAll list items with footballer fullName = \"%s\".\n", fullName);
   // printTableHeader();
@@ -405,10 +431,37 @@ void test(int footballersCount, char* fullName) {
   free(footballers);
 }
 
+void runTests(int footballersCount, int testsCount, int printEveryTest) {
+  srand(time(NULL)); // Init first random number.
+
+  int rand1 = rand() % 26;
+  int rand2 = rand() % 26;
+
+  int binaryTreeAccTime = 0;
+  int hashTableAccTime = 0;
+
+  for (int i = 0; i < testsCount; i++) {
+    test(footballersCount, generateString(rand1, rand2), rand1, rand2, &binaryTreeAccTime, &hashTableAccTime, printEveryTest);
+  }
+
+  printf("\n============================================================= Average from %d tests =============================================================\n\n", testsCount);
+
+  printf("BinarySearchTree %4s%7d: %.00fns\n", "footballersCount=", footballersCount, (double)(binaryTreeAccTime / testsCount));
+  printf("HashTable %24s%7d: %.00fns\n", "footballersCount=", footballersCount, (double)(hashTableAccTime / testsCount));
+
+  printf("\n\n");
+}
+
 int main() {
   printf("Lab 11. Keyer, BAM231.\n");
 
-  test(1000000, "a");
+  runTests(1000, 100, 0);
+  runTests(5000, 100, 0);
+  runTests(10000, 100, 0);
+  runTests(20000, 100, 0);
+  runTests(50000, 100, 0);
+  runTests(100000, 100, 0);
+  runTests(1000000, 100, 0);
 
   return 0;
 }
