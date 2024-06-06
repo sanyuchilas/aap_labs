@@ -62,9 +62,9 @@ char* generateString(int length, int countOfUsedSymbols) {
 // Function generating footballer.
 Footballer generateFootballer() {
   Footballer out = {
-    .fullName=generateString(1, 3),
-    .clubName=generateString(1, 1),
-    .role=generateString(1, 1),
+    .fullName=generateString(10, 10),
+    .clubName=generateString(10, 10),
+    .role=generateString(10, 10),
     .age=(rand() % 100),
     .numberOfGames=(rand() % 100),
     .numberOfGoals=(rand() % 100),
@@ -112,13 +112,9 @@ Node* insertNode(Node* root, Node* insertionNode) {
   }
 
   if (compareFootballers(insertionNode->footballer, root->footballer, 1) >= 0) {
-    // printf("Right: %20p %20p\n", root, root->right);
     root->right = insertNode(root->right, insertionNode);
-    // printf("Right: %20p %20p\n", root, root->right);
   } else {
-    // printf("Left : %20p %20p\n", root, root->left);
     root->left = insertNode(root->left, insertionNode);
-    // printf("Left : %20p %20p\n", root, root->left);
   }
 
   return root;
@@ -129,10 +125,7 @@ void insertNodeByFootballer(Node* root, Footballer* footballer) {
 }
 
 Node* createTreeFromFootballersArray(Footballer* footballers, int footballersCount) {
-  Node* root = (Node*)malloc(sizeof(Node));
-
-  root->footballer = footballers;
-  root->left = root->right = NULL;
+  Node* root = createNode(&footballers[0]);
 
   for (int i = 1; i < footballersCount; i++) {
     insertNodeByFootballer(root, footballers + i);
@@ -314,6 +307,34 @@ void printFootballersListItems(ListItem** listItems, int listItemsCount) {
   }
 }
 
+// Function to free memory allocated for binary search tree nodes.
+void freeBinarySearchTreeNodes(Node* root) {
+  if (root == NULL) {
+    return;
+  }
+
+  freeBinarySearchTreeNodes(root->left);
+  freeBinarySearchTreeNodes(root->right);
+
+  // Free the node itself.
+  free(root);
+}
+
+// Function to free memory allocated for hash table list items.
+void freeHashTableListItems(HashTable* hashTable) {
+  for (int i = 0; i < hashTable->size; i++) {
+    ListItem* listItem = hashTable->table[i];
+
+    while (listItem != NULL) {
+      ListItem* temp = listItem;
+      listItem = listItem->next;
+
+      // Free the list item itself.
+      free(temp);
+    }
+  }
+}
+
 int testsCounter = 1;
 
 void test(int footballersCount, char* fullName) {
@@ -323,10 +344,10 @@ void test(int footballersCount, char* fullName) {
 
   Footballer* footballers = generateFootballersArray(footballersCount);
 
-  printf("\nPrint footballers array.\n");
-  printFootballersArray(footballers, footballersCount);
+  // printf("\nPrint footballers array.\n");
+  // printFootballersArray(footballers, footballersCount);
 
-  printf("\n==== Binary tree ====\n");
+  // printf("\n==== Binary tree ====\n");
 
   // Create binary search tree.
 
@@ -342,11 +363,11 @@ void test(int footballersCount, char* fullName) {
 
   int nodesCount = findAllNodesInBinarySearchTreeByFootballerFullName(root, fullName, nodes);
 
-  printf("\nAll nodes with footballer fullName = \"%s\".\n", fullName);
-  printTableHeader();
-  printNodesArray(nodes, nodesCount);
+  // printf("\nAll nodes with footballer fullName = \"%s\".\n", fullName);
+  // printTableHeader();
+  // printNodesArray(nodes, nodesCount);
 
-  printf("\n==== Hash table ====\n");
+  // printf("\n==== Hash table ====\n");
 
   // Create hash table.
 
@@ -362,22 +383,32 @@ void test(int footballersCount, char* fullName) {
 
   int listItemsCount = findAllListItemsInHashTableByFootballerFullName(hashTable, fullName, listItems);
 
-  printf("\nAll list items with footballer fullName = \"%s\".\n", fullName);
-  printTableHeader();
-  printFootballersListItems(listItems, listItemsCount);
+  // printf("\nAll list items with footballer fullName = \"%s\".\n", fullName);
+  // printTableHeader();
+  // printFootballersListItems(listItems, listItemsCount);
 
   // End program and free allocated memory.
 
-  free(footballers);
-  free(root);
+  freeBinarySearchTreeNodes(root);
+  freeHashTableListItems(hashTable);
+
   free(nodes);
   free(listItems);
+
+  // Free the memory allocated for the footballers array and the strings inside it.
+  for (int i = 0; i < footballersCount; i++) {
+    free(footballers[i].fullName);
+    free(footballers[i].clubName);
+    free(footballers[i].role);
+  }
+
+  free(footballers);
 }
 
 int main() {
   printf("Lab 11. Keyer, BAM231.\n");
 
-  test(100, "ab");
+  test(1000000, "a");
 
   return 0;
 }
