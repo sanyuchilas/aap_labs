@@ -1,0 +1,13 @@
+# 1 ".\\01_Keyer_BAM231.cpp"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 ".\\01_Keyer_BAM231.cpp"
+# 1 ".\\foo.h" 1
+int foo() {
+    return 0;
+};
+# 2 ".\\01_Keyer_BAM231.cpp" 2
+
+int main() {
+    foo();
+}

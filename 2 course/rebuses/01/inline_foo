@@ -1,0 +1,9 @@
+# 1 ".\\foo.cpp"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 ".\\foo.cpp"
+# 1 ".\\foo.h" 1
+inline int foo() {
+    return 0;
+};
+# 1 ".\\foo.cpp" 2
